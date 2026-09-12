@@ -1172,12 +1172,16 @@
   }
   checkOrient();
 
-  /* 首次交互解锁音频 */
-  window.addEventListener('pointerdown', function once() {
+  /* 首次交互解锁音频（兼容移动端：pointerdown 在 touchstart preventDefault 后可能不触发，
+     所以 touchstart / pointerdown / mousedown 都监听；音频真正 running 前持续尝试） */
+  function unlockAudio() {
     PG.audio.resume();
-    if (G.state === 'title') PG.audio.startMusic('title');
-    window.removeEventListener('pointerdown', once);
-  });
+    var c = PG.audio.ctx;
+    if (c && c.state === 'running' && G.state === 'title') PG.audio.startMusic('title');
+  }
+  window.addEventListener('touchstart', unlockAudio, { passive: true });
+  window.addEventListener('pointerdown', unlockAudio);
+  window.addEventListener('mousedown', unlockAudio);
 
   /* 清空存档 */
   window.addEventListener('keydown', function (e) {
