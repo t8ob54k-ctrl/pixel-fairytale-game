@@ -24,10 +24,7 @@
   }
   html,body{
     margin:0;padding:0;width:100%;height:100%;
-    background:
-      radial-gradient(circle at 20% 20%,rgba(255,180,100,.15),transparent 30%),
-      radial-gradient(circle at 80% 80%,rgba(255,120,80,.1),transparent 30%),
-      linear-gradient(135deg,#fff5e6 0%,#ffe8cc 50%,#ffd4a3 100%);
+    background:#000;
     color:#5a3e2b;
     font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
     overflow:hidden;
@@ -48,30 +45,16 @@
     display:flex;align-items:center;justify-content:center;
     width:100%;height:100%;
   }
-  #wrap::before{
-    content:"PIXEL FAIRYTALE";position:fixed;left:18px;top:15px;
-    color:rgba(255,255,255,.5);font-size:10px;font-weight:800;letter-spacing:.22em;
-    text-shadow:0 0 18px rgba(124,245,255,.35);pointer-events:none;
-  }
+  #wrap::before{display:none;}
   #stage{
     position:relative;
     line-height:0;
-    border-radius:12px;
+    border-radius:0;
     overflow:hidden;
     isolation:isolate;
     background:#000;
-    box-shadow:
-      0 0 0 1px rgba(255,255,255,.18),
-      0 0 0 4px #251a3d,
-      0 0 0 6px #090611,
-      0 24px 70px rgba(0,0,0,.72),
-      0 0 100px rgba(138,108,255,.2);
   }
-  #stage::after{
-    content:"";position:absolute;inset:0;z-index:4;pointer-events:none;
-    border:1px solid rgba(255,255,255,.12);border-radius:11px;
-    box-shadow:inset 0 0 28px rgba(5,2,12,.32);
-  }
+  #stage::after{display:none;}
   /* 世界层：低分辨率 + 最近邻放大，保持像素锐利 */
   #screen{
     display:block;
