@@ -686,17 +686,23 @@
 
     ctx.textAlign = 'center';
 
-    // 游戏标题（像素风大标题，暖金+深棕描边）
-    ctx.font = 'bold 28px "Fusion Pixel",monospace';
-    // 深棕描边
+    // 标题背景面板（Kenney像素风奶油面板）
+    var titleW = 280, titleH = 50;
+    var titleX = VW / 2 - titleW / 2, titleY = 45;
+    // 深棕外框
     ctx.fillStyle = '#5a3e2b';
-    ctx.fillText('像素童话大陆', VW / 2 + 2, 72 + 2);
-    ctx.fillText('像素童话大陆', VW / 2 - 2, 72 - 2);
-    ctx.fillText('像素童话大陆', VW / 2 + 2, 72 - 2);
-    ctx.fillText('像素童话大陆', VW / 2 - 2, 72 + 2);
-    // 暖金色字
-    ctx.fillStyle = '#fff3d6';
-    ctx.fillText('像素童话大陆', VW / 2, 72);
+    ctx.fillRect(titleX, titleY, titleW, titleH);
+    // 奶油色面板
+    ctx.fillStyle = '#f5e6c8';
+    ctx.fillRect(titleX + 3, titleY + 3, titleW - 6, titleH - 6);
+    // 顶部高光
+    ctx.fillStyle = '#fff0d6';
+    ctx.fillRect(titleX + 3, titleY + 3, titleW - 6, 6);
+
+    // 游戏标题（像素风大标题，深棕色）
+    ctx.font = 'bold 26px "Fusion Pixel",monospace';
+    ctx.fillStyle = '#5a3e2b';
+    ctx.fillText('像素童话大陆', VW / 2, titleY + 32);
 
     // 副标题
     ctx.font = 'bold 12px "Fusion Pixel",monospace';
@@ -707,12 +713,24 @@
     var bob = Math.sin(G.t * 2) * 3;
     PG.drawSpr(ctx, PG.SPR.heroIdle, VW / 2 - 6, 120 + bob, false, null);
 
-    // 开始提示（闪烁，暖白色）
+    // 开始按钮（Kenney风格像素按钮）
     var blink = Math.floor(G.t * 2) % 2;
-    ctx.font = 'bold 14px "Fusion Pixel",monospace';
+    var btnW = 180, btnH = 30;
+    var btnX = VW / 2 - btnW / 2, btnY = 165;
     if (blink) {
+      // 深棕边框
+      ctx.fillStyle = '#5a3e2b';
+      ctx.fillRect(btnX, btnY, btnW, btnH);
+      // 橙色按钮面
+      ctx.fillStyle = '#ff8c42';
+      ctx.fillRect(btnX + 3, btnY + 3, btnW - 6, btnH - 6);
+      // 高光
+      ctx.fillStyle = '#ffb380';
+      ctx.fillRect(btnX + 3, btnY + 3, btnW - 6, 5);
+      // 文字
+      ctx.font = 'bold 14px "Fusion Pixel",monospace';
       ctx.fillStyle = '#fff';
-      ctx.fillText('按 回车键 开始游戏', VW / 2, 180);
+      ctx.fillText('按 回车 开始', VW / 2, btnY + 20);
     }
 
     // 底部信息（深棕色）
@@ -764,23 +782,34 @@
       var locked = (i + 1) > d.unlocked;
       var sel = i === G.selWorld;
 
-      // 卡片背景（暖白色）
-      ctx.fillStyle = locked ? '#f0e6d6' : '#fff8ee';
+      // 像素风奶油色面板（Kenney Pixel Adventure风格）
+      // 外层深棕边框
+      ctx.fillStyle = '#5a3e2b';
       ctx.fillRect(x, y, cardW, cardH);
-      ctx.strokeStyle = sel ? '#ff6b35' : '#d4a574';
-      ctx.lineWidth = sel ? 3 : 1;
-      ctx.strokeRect(x, y, cardW, cardH);
+      // 内层奶油色背景
+      ctx.fillStyle = locked ? '#d4c4a8' : '#f5e6c8';
+      ctx.fillRect(x + 3, y + 3, cardW - 6, cardH - 6);
+      // 选中时加橙色高亮边框
+      if (sel) {
+        ctx.fillStyle = '#ff6b35';
+        ctx.fillRect(x - 2, y - 2, cardW + 4, cardH + 4);
+        ctx.fillStyle = locked ? '#d4c4a8' : '#f5e6c8';
+        ctx.fillRect(x + 3, y + 3, cardW - 6, cardH - 6);
+      }
 
       // 世界预览色块（顶部）
       var previewH = 40;
       if (!locked) {
+        // 预览区奶油色边框
+        ctx.fillStyle = '#8b5a2b';
+        ctx.fillRect(x + 6, y + 6, cardW - 12, previewH);
         ctx.fillStyle = th.sky[0];
-        ctx.fillRect(x + 2, y + 2, cardW - 4, previewH);
+        ctx.fillRect(x + 8, y + 8, cardW - 16, previewH - 4);
         ctx.fillStyle = th.sky[1] || th.sky[0];
-        ctx.fillRect(x + 2, y + previewH - 10, cardW - 4, 10);
+        ctx.fillRect(x + 8, y + previewH - 4, cardW - 16, 6);
       } else {
-        ctx.fillStyle = '#e0d5c0';
-        ctx.fillRect(x + 2, y + 2, cardW - 4, previewH);
+        ctx.fillStyle = '#b8a888';
+        ctx.fillRect(x + 6, y + 6, cardW - 12, previewH);
       }
 
       // 世界名称
@@ -798,13 +827,17 @@
         var lvLocked = locked;
         var isSel = sel && l === G.selLevel;
 
-        // 选中关卡高亮（暖橙色）
+        // 选中关卡按钮（Kenney风格像素按钮）
         if (isSel) {
-          ctx.fillStyle = 'rgba(255,107,53,0.2)';
+          // 深棕边框
+          ctx.fillStyle = '#5a3e2b';
           ctx.fillRect(x + 6, ly, cardW - 12, 22);
-          ctx.strokeStyle = '#ff6b35';
-          ctx.lineWidth = 1;
-          ctx.strokeRect(x + 6, ly, cardW - 12, 22);
+          // 橙色按钮面
+          ctx.fillStyle = '#ff8c42';
+          ctx.fillRect(x + 8, ly + 2, cardW - 16, 18);
+          // 高光
+          ctx.fillStyle = '#ffb380';
+          ctx.fillRect(x + 8, ly + 2, cardW - 16, 4);
         }
 
         ctx.font = '9px "Fusion Pixel",monospace';
