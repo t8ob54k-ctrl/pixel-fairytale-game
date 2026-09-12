@@ -487,7 +487,7 @@
     var bossOn = !!bossRef;
 
     // 像素风HUD：白色字 + 黑色描边
-    ctx.font = 'bold 11px "Fusion Pixel",monospace';
+    ctx.font = '10px "Fusion Pixel",monospace';
     ctx.textBaseline = 'top';
 
     // 绘制带黑描边的文字（马里奥经典风格）
@@ -687,8 +687,8 @@
     ctx.textAlign = 'center';
 
     // 标题背景面板（Kenney像素风奶油面板）
-    var titleW = 280, titleH = 50;
-    var titleX = VW / 2 - titleW / 2, titleY = 45;
+    var titleW = 280, titleH = 56;
+    var titleX = VW / 2 - titleW / 2, titleY = 40;
     // 深棕外框
     ctx.fillStyle = '#5a3e2b';
     ctx.fillRect(titleX, titleY, titleW, titleH);
@@ -699,15 +699,15 @@
     ctx.fillStyle = '#fff0d6';
     ctx.fillRect(titleX + 3, titleY + 3, titleW - 6, 6);
 
-    // 游戏标题（像素风大标题，深棕色）
-    ctx.font = 'bold 26px "Fusion Pixel",monospace';
+    // 游戏标题（像素风，适配像素字体尺寸）
+    ctx.font = '16px "Fusion Pixel",monospace';
     ctx.fillStyle = '#5a3e2b';
-    ctx.fillText('像素童话大陆', VW / 2, titleY + 32);
+    ctx.fillText('像素童话大陆', VW / 2, titleY + 26);
 
-    // 副标题
-    ctx.font = 'bold 12px "Fusion Pixel",monospace';
-    ctx.fillStyle = '#ff6b35';
-    ctx.fillText('★ 小星冒险家 ★', VW / 2, 95);
+    // 副标题（放在面板底部）
+    ctx.font = '10px "Fusion Pixel",monospace';
+    ctx.fillStyle = '#b85c29';
+    ctx.fillText('★ 小星冒险家 ★', VW / 2, titleY + 44);
 
     // 主角
     var bob = Math.sin(G.t * 2) * 3;
@@ -728,9 +728,9 @@
       ctx.fillStyle = '#ffb380';
       ctx.fillRect(btnX + 3, btnY + 3, btnW - 6, 5);
       // 文字
-      ctx.font = 'bold 14px "Fusion Pixel",monospace';
+      ctx.font = '11px "Fusion Pixel",monospace';
       ctx.fillStyle = '#fff';
-      ctx.fillText('按 回车 开始', VW / 2, btnY + 20);
+      ctx.fillText('按 回车 开始', VW / 2, btnY + 19);
     }
 
     // 底部信息（深棕色）
@@ -761,11 +761,11 @@
 
     ctx.textAlign = 'center';
 
-    // 标题（暖棕色）
-    ctx.font = 'bold 18px "Fusion Pixel",monospace';
+    // 标题（暖棕色，像素字体原生尺寸）
+    ctx.font = '14px "Fusion Pixel",monospace';
     ctx.fillStyle = '#8b4513';
     ctx.fillText('选择世界', VW / 2, 28);
-    ctx.font = '11px "Fusion Pixel",monospace';
+    ctx.font = '10px "Fusion Pixel",monospace';
     ctx.fillStyle = '#a67c52';
     ctx.fillText('← → 选择世界    ↑ ↓ 选择关卡    回车 开始', VW / 2, 46);
 
@@ -813,12 +813,12 @@
       }
 
       // 世界名称
-      ctx.font = 'bold 13px "Fusion Pixel",monospace';
+      ctx.font = '11px "Fusion Pixel",monospace';
       ctx.fillStyle = locked ? '#b8a080' : '#5a3e2b';
       ctx.fillText(th.name, x + cardW / 2, y + 18);
-      ctx.font = '10px "Fusion Pixel",monospace';
+      ctx.font = '9px "Fusion Pixel",monospace';
       ctx.fillStyle = locked ? '#c0a888' : '#8b5a2b';
-      ctx.fillText(locked ? '🔒 未解锁' : '第 ' + (i+1) + ' 世界', x + cardW / 2, y + 34);
+      ctx.fillText(locked ? '未解锁' : '第' + (i+1) + '世界', x + cardW / 2, y + 34);
 
       // 关卡列表
       for (var l = 0; l < 3; l++) {
