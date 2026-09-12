@@ -79,8 +79,8 @@ window.PG = window.PG || {};
       var a = btn.getAttribute('data-k');
       var on  = function (e) {
         e.preventDefault();
-        // 关键：在用户触摸的直接调用栈里解锁音频（iOS必须这样才有声）
-        if (PG.audio) PG.audio.resume();
+        // 关键：在用户触摸的同步调用栈里激活音频（iOS必须播放声音才能解锁）
+        if (PG.audio) PG.audio.unlock();
         setKey(a, true);
         btn.classList.add('on');
       };
@@ -125,9 +125,31 @@ window.PG = window.PG || {};
         }
       }
     },
+    // iOS 关键：必须在用户手势的【同步调用栈】里真正播放一个 buffer，
+    // 才能激活 AVAudioSession；只 resume 不发声，iOS 仍会保持静音。
+    unlocked: false,
+    unlock: function () {
+      var c = this.ensure();
+      if (!c) return false;
+      try {
+        if (c.state === 'suspended' || c.state === 'interrupted') c.resume();
+        // 播放一个 1 帧的极短静音 buffer，专门用来“捅醒”iOS 音频硬件
+        var buf = c.createBuffer(1, 1, 22050);
+        var src = c.createBufferSource();
+        src.buffer = buf;
+        var g = c.createGain();
+        g.gain.value = 0.0001;   // 人耳听不到，但走完整播放链路
+        src.connect(g); g.connect(c.destination);
+        if (src.start) src.start(0);
+        this.unlocked = true;
+      } catch (e) {}
+      return c.state === 'running';
+    },
     tone: function (freq, dur, type, vol, slideTo) {
       if (!this.on) return;
       var c = this.ensure(); if (!c) return;
+      // 双保险：若中途被系统挂起（如下拉通知栏回来），尝试恢复
+      if (c.state === 'suspended') { try { c.resume(); } catch (e) {} }
       var t = c.currentTime;
       var o = c.createOscillator(), g = c.createGain();
       o.type = type || 'square';
