@@ -1153,13 +1153,21 @@
     }
   });
 
-  requestAnimationFrame(frame);
+  /* 等像素字体加载完成后再启动，避免canvas用fallback字体 */
+  function startGame() {
+    requestAnimationFrame(frame);
 
-  /* 调试入口：?level=w-l 直接进关 */
-  var m = /[?&]level=(\d)-(\d)/.exec(location.search);
-  if (m) {
-    G.lives = 5; G.selWorld = +m[1]; G.selLevel = +m[2];
-    G.loadLevel(+m[1], +m[2]);
+    /* 调试入口：?level=w-l 直接进关 */
+    var m = /[?&]level=(\d)-(\d)/.exec(location.search);
+    if (m) {
+      G.lives = 5; G.selWorld = +m[1]; G.selLevel = +m[2];
+      G.loadLevel(+m[1], +m[2]);
+    }
+  }
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(startGame);
+  } else {
+    startGame();
   }
 
 })(window.PG);
