@@ -510,11 +510,10 @@
     var scoreStr = String(G.score).padStart(6, '0');
     drawPixelText(scoreStr, 30, hudY + 12, 'left', '#fff');
 
-    // 中左：金币
-    // 画个小金币图标
-    ctx.fillStyle = '#f8d848';
+    // 中左：金币（暖金色）
+    ctx.fillStyle = '#ffc107';
     ctx.beginPath(); ctx.arc(130, hudY + 16, 5, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#d4a828';
+    ctx.fillStyle = '#ff9800';
     ctx.beginPath(); ctx.arc(130, hudY + 16, 3, 0, Math.PI*2); ctx.fill();
     drawPixelText('×' + String(G.coins).padStart(2, '0'), 140, hudY + 12, 'left', '#fff');
 
@@ -549,8 +548,8 @@
     /* 星辰能量条 —— 左下角轻量化，无厚重背景 */
     var rw = PG.rewind;
     var rwY = VH - 16;
-    // 小图标
-    ctx.fillStyle = '#7cf5ff';
+    // 小图标（暖橙色星星）
+    ctx.fillStyle = '#ff9500';
     ctx.beginPath();
     ctx.moveTo(12, rwY - 8);
     ctx.lineTo(15, rwY - 3);
@@ -564,10 +563,10 @@
     ctx.lineTo(9, rwY - 3);
     ctx.closePath(); ctx.fill();
 
-    // 能量条（细条，无背景）
-    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    // 能量条（细条，暖橙色）
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
     ctx.fillRect(26, rwY - 2, 60, 4);
-    ctx.fillStyle = rw.energy > 0.18 ? '#7cf5ff' : '#ff7a9a';
+    ctx.fillStyle = rw.energy > 0.18 ? '#ff9500' : '#ff6b6b';
     ctx.fillRect(26, rwY - 2, 60 * rw.energy, 4);
 
     // 提示文字
@@ -637,18 +636,25 @@
 
   /* ---------------- 标题 / 地图 / 结算 ---------------- */
   function renderTitle() {
-    // 经典马里奥风格主菜单：蓝天背景 + 像素大标题 + 闪烁开始提示
+    // 暖色调主菜单：夕阳橙金 + 暖米色背景
     var ctx = uctx;
 
-    // 天空背景（马里奥经典蓝）
+    // 天空背景（暖夕阳渐变）
     var skyGrad = ctx.createLinearGradient(0, 0, 0, VH);
-    skyGrad.addColorStop(0, '#5c94fc');
-    skyGrad.addColorStop(1, '#8cb8ff');
+    skyGrad.addColorStop(0, '#ff9a56');
+    skyGrad.addColorStop(0.5, '#ffb87a');
+    skyGrad.addColorStop(1, '#ffd4a3');
     ctx.fillStyle = skyGrad;
     ctx.fillRect(0, 0, VW, VH);
 
-    // 远山（绿色山丘）
-    ctx.fillStyle = '#3aa83a';
+    // 太阳装饰
+    ctx.fillStyle = 'rgba(255,240,180,0.6)';
+    ctx.beginPath();
+    ctx.arc(VW - 60, 50, 30, 0, Math.PI*2);
+    ctx.fill();
+
+    // 远山（暖金色山丘）
+    ctx.fillStyle = '#d4874a';
     ctx.beginPath();
     ctx.moveTo(0, VH - 30);
     ctx.quadraticCurveTo(60, VH - 80, 120, VH - 30);
@@ -660,14 +666,14 @@
     ctx.closePath();
     ctx.fill();
 
-    // 地面
-    ctx.fillStyle = '#c84c0c';
+    // 地面（暖棕色）
+    ctx.fillStyle = '#8b5a2b';
     ctx.fillRect(0, VH - 24, VW, 24);
-    ctx.fillStyle = '#e07030';
+    ctx.fillStyle = '#a67c52';
     ctx.fillRect(0, VH - 24, VW, 6);
 
-    // 白云装饰
-    ctx.fillStyle = '#fff';
+    // 暖白云朵
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
     for (var c = 0; c < 4; c++) {
       var cx = 40 + c * 120 + Math.sin(G.t * 0.5 + c) * 10;
       var cy = 30 + (c % 2) * 25;
@@ -680,28 +686,28 @@
 
     ctx.textAlign = 'center';
 
-    // 游戏标题（像素风大标题，红白配色）
+    // 游戏标题（像素风大标题，暖金+深棕描边）
     ctx.font = 'bold 28px "Courier New", monospace';
-    // 黑色描边
-    ctx.fillStyle = '#000';
+    // 深棕描边
+    ctx.fillStyle = '#5a3e2b';
     ctx.fillText('像素童话大陆', VW / 2 + 2, 72 + 2);
     ctx.fillText('像素童话大陆', VW / 2 - 2, 72 - 2);
     ctx.fillText('像素童话大陆', VW / 2 + 2, 72 - 2);
     ctx.fillText('像素童话大陆', VW / 2 - 2, 72 + 2);
-    // 白色字
-    ctx.fillStyle = '#fff';
+    // 暖金色字
+    ctx.fillStyle = '#fff3d6';
     ctx.fillText('像素童话大陆', VW / 2, 72);
 
     // 副标题
     ctx.font = 'bold 12px "Courier New", monospace';
-    ctx.fillStyle = '#ffe066';
+    ctx.fillStyle = '#ff6b35';
     ctx.fillText('★ 小星冒险家 ★', VW / 2, 95);
 
     // 主角
     var bob = Math.sin(G.t * 2) * 3;
     PG.drawSpr(ctx, PG.SPR.heroIdle, VW / 2 - 6, 120 + bob, false, null);
 
-    // 开始提示（闪烁）
+    // 开始提示（闪烁，暖白色）
     var blink = Math.floor(G.t * 2) % 2;
     ctx.font = 'bold 11px "Courier New", monospace';
     if (blink) {
@@ -709,24 +715,27 @@
       ctx.fillText('PRESS ENTER TO START', VW / 2, 180);
     }
 
-    // 底部信息
+    // 底部信息（深棕色）
     ctx.font = '9px "Courier New", monospace';
-    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.fillStyle = 'rgba(90,62,43,0.8)';
     ctx.fillText('WORLDS: ' + PG.save.load().unlocked + '/5   STARS: ' + PG.save.load().stars + '/30', VW / 2, 250);
 
     ctx.textAlign = 'left';
   }
 
   function renderMap() {
-    // 马里奥风格选关界面：像素风 + 世界卡片 + 星星评价
+    // 暖色调选关界面：暖米色背景 + 橙金卡片
     var ctx = uctx;
 
-    // 深色背景
-    ctx.fillStyle = '#0f0c29';
+    // 暖米色背景
+    var bgGrad = ctx.createLinearGradient(0, 0, 0, VH);
+    bgGrad.addColorStop(0, '#fff5e6');
+    bgGrad.addColorStop(1, '#ffe8cc');
+    ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, VW, VH);
 
-    // 背景装饰
-    ctx.fillStyle = 'rgba(255,255,255,0.03)';
+    // 背景装饰（暖橙色小点）
+    ctx.fillStyle = 'rgba(255,150,80,0.1)';
     for (var s = 0; s < 30; s++) {
       var sx = (s * 97) % VW, sy = (s * 53) % VH;
       ctx.fillRect(sx, sy, 2, 2);
@@ -734,12 +743,12 @@
 
     ctx.textAlign = 'center';
 
-    // 标题
+    // 标题（暖棕色）
     ctx.font = 'bold 16px "Courier New", monospace';
-    ctx.fillStyle = '#ffe066';
+    ctx.fillStyle = '#8b4513';
     ctx.fillText('SELECT WORLD', VW / 2, 28);
     ctx.font = '9px "Courier New", monospace';
-    ctx.fillStyle = '#9b90bd';
+    ctx.fillStyle = '#a67c52';
     ctx.fillText('← → 选择世界    ↑ ↓ 选择关卡    ENTER 开始', VW / 2, 44);
 
     var d = PG.save.load();
@@ -755,10 +764,10 @@
       var locked = (i + 1) > d.unlocked;
       var sel = i === G.selWorld;
 
-      // 卡片背景（像素风，无圆角）
-      ctx.fillStyle = locked ? '#1a1530' : '#2a2050';
+      // 卡片背景（暖白色）
+      ctx.fillStyle = locked ? '#f0e6d6' : '#fff8ee';
       ctx.fillRect(x, y, cardW, cardH);
-      ctx.strokeStyle = sel ? '#ffe066' : '#3a3060';
+      ctx.strokeStyle = sel ? '#ff6b35' : '#d4a574';
       ctx.lineWidth = sel ? 3 : 1;
       ctx.strokeRect(x, y, cardW, cardH);
 
@@ -770,16 +779,16 @@
         ctx.fillStyle = th.sky[1] || th.sky[0];
         ctx.fillRect(x + 2, y + previewH - 10, cardW - 4, 10);
       } else {
-        ctx.fillStyle = '#252045';
+        ctx.fillStyle = '#e0d5c0';
         ctx.fillRect(x + 2, y + 2, cardW - 4, previewH);
       }
 
       // 世界名称
       ctx.font = 'bold 11px "Courier New", monospace';
-      ctx.fillStyle = locked ? '#5a5080' : '#fff';
+      ctx.fillStyle = locked ? '#b8a080' : '#5a3e2b';
       ctx.fillText(th.name, x + cardW / 2, y + 16);
       ctx.font = '8px "Courier New", monospace';
-      ctx.fillStyle = locked ? '#4a4070' : '#c0b8e0';
+      ctx.fillStyle = locked ? '#c0a888' : '#8b5a2b';
       ctx.fillText(locked ? 'LOCKED' : 'WORLD ' + (i+1), x + cardW / 2, y + 30);
 
       // 关卡列表
@@ -789,17 +798,17 @@
         var lvLocked = locked;
         var isSel = sel && l === G.selLevel;
 
-        // 选中关卡高亮
+        // 选中关卡高亮（暖橙色）
         if (isSel) {
-          ctx.fillStyle = 'rgba(255,224,102,0.3)';
+          ctx.fillStyle = 'rgba(255,107,53,0.2)';
           ctx.fillRect(x + 6, ly, cardW - 12, 22);
-          ctx.strokeStyle = '#ffe066';
+          ctx.strokeStyle = '#ff6b35';
           ctx.lineWidth = 1;
           ctx.strokeRect(x + 6, ly, cardW - 12, 22);
         }
 
         ctx.font = '9px "Courier New", monospace';
-        ctx.fillStyle = lvLocked ? '#4a4070' : '#e0d8ff';
+        ctx.fillStyle = lvLocked ? '#b8a080' : '#6b4423';
         ctx.textAlign = 'left';
         var label = l === 2 ? 'BOSS' : (i+1) + '-' + (l+1);
         ctx.fillText(label, x + 12, ly + 15);
@@ -808,7 +817,7 @@
         if (!lvLocked && info.stars > 0) {
           ctx.textAlign = 'right';
           ctx.font = '8px "Courier New", monospace';
-          ctx.fillStyle = '#ffd700';
+          ctx.fillStyle = '#ff9500';
           ctx.fillText('★'.repeat(info.stars), x + cardW - 10, ly + 15);
         }
         ctx.textAlign = 'center';
@@ -817,7 +826,7 @@
 
     // 底部说明
     ctx.font = '9px "Courier New", monospace';
-    ctx.fillStyle = '#8d80b8';
+    ctx.fillStyle = '#8b5a2b';
     var desc = [
       '草原世界 · 适合新手入门',
       '森林世界 · 高低错落地形',
@@ -826,7 +835,7 @@
       '城堡世界 · 终极BOSS决战'
     ][G.selWorld];
     ctx.fillText(desc, VW / 2, 225);
-    ctx.fillStyle = '#6a5f90';
+    ctx.fillStyle = '#a67c52';
     ctx.font = '8px "Courier New", monospace';
     ctx.fillText('ENTER 出发    ESC 返回标题', VW / 2, 245);
 
