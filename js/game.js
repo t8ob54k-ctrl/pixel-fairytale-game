@@ -476,7 +476,7 @@
   }
 
   function drawHUD() {
-    // Switch风格HUD：简洁圆角卡片 + 半透明毛玻璃感
+    // 经典马里奥HUD风格：顶部通栏 + 白字黑描边 + 无厚重底
     var ctx = uctx;
     var lv = G.lv;
     var bossRef = null;
@@ -485,81 +485,118 @@
       if (be.type === 'boss' && !be.dead && be.hp > 0) { bossRef = be; break; }
     }
     var bossOn = !!bossRef;
-    ctx.font = 'bold 9px "PingFang SC","Microsoft YaHei",sans-serif';
-    ctx.textAlign = 'left';
 
-    // 顶部HUD栏（Switch风格圆角半透明）
-    ctx.fillStyle = 'rgba(0,0,0,0.35)';
-    roundRect(ctx, 4, 4, VW - 8, 18, 9); ctx.fill();
+    // 像素风HUD：白色字 + 黑色描边
+    ctx.font = 'bold 10px "Press Start 2P", "Courier New", monospace';
+    ctx.textBaseline = 'top';
 
-    var th = PG.WORLDS[lv.world];
-    ctx.fillStyle = '#fff';
-    ctx.fillText((lv.isBonus ? '✦ 密室彩蛋' : th.name + ' ' + (lv.index + 1) + '-1'), 12, 16);
+    // 绘制带黑描边的文字（马里奥经典风格）
+    function drawPixelText(text, x, y, align, color) {
+      ctx.textAlign = align || 'left';
+      ctx.fillStyle = '#000';
+      ctx.fillText(text, x + 1, y + 1);
+      ctx.fillText(text, x - 1, y - 1);
+      ctx.fillText(text, x + 1, y - 1);
+      ctx.fillText(text, x - 1, y + 1);
+      ctx.fillStyle = color || '#fff';
+      ctx.fillText(text, x, y);
+    }
 
-    // 金币
-    ctx.fillStyle = '#ffd700';
-    ctx.beginPath(); ctx.arc(148, 12, 4, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#b8860b';
-    ctx.beginPath(); ctx.arc(148, 12, 2.5, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#fff';
-    ctx.fillText('×' + G.coins, 156, 16);
+    // ===== 顶部通栏 HUD（FC马里奥经典布局）=====
+    var hudY = 6;
 
-    // 星星
-    ctx.fillStyle = '#ffd700';
-    ctx.fillText('★' + G.stars + '/3', 190, 16);
+    // 左：SCORE
+    drawPixelText('SCORE', 30, hudY, 'left', '#fff');
+    var scoreStr = String(G.score).padStart(6, '0');
+    drawPixelText(scoreStr, 30, hudY + 12, 'left', '#fff');
 
-    // 生命
-    ctx.fillStyle = '#ff4757';
-    ctx.fillText('♥' + Math.max(0, G.lives), 225, 16);
+    // 中左：金币
+    // 画个小金币图标
+    ctx.fillStyle = '#f8d848';
+    ctx.beginPath(); ctx.arc(130, hudY + 16, 5, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#d4a828';
+    ctx.beginPath(); ctx.arc(130, hudY + 16, 3, 0, Math.PI*2); ctx.fill();
+    drawPixelText('×' + String(G.coins).padStart(2, '0'), 140, hudY + 12, 'left', '#fff');
 
-    // 得分
-    ctx.fillStyle = '#7cf5ff';
-    ctx.fillText('分数 ' + G.score, 260, 16);
+    // 中：WORLD
+    var worldLabel = lv.isBonus ? 'BONUS' : 'WORLD ' + (lv.world + 1) + '-' + (lv.index + 1);
+    drawPixelText(worldLabel, VW / 2, hudY, 'center', '#fff');
 
-    // 时间
+    // 中右：生命
+    drawPixelText('×' + Math.max(0, G.lives), VW / 2 + 70, hudY + 12, 'left', '#fff');
+
+    // 右：TIME
     var t = Math.ceil(G.time);
-    ctx.fillStyle = t < 30 ? (Math.floor(G.t * 6) % 2 ? '#ff4757' : '#fff') : '#fff';
-    ctx.textAlign = 'right';
-    ctx.fillText('⏱ ' + t + 's', VW - 12, 16);
-    ctx.textAlign = 'left';
+    var timeColor = t < 30 ? (Math.floor(G.t * 6) % 2 ? '#ff0000' : '#fff') : '#fff';
+    drawPixelText('TIME', VW - 60, hudY, 'right', '#fff');
+    drawPixelText(String(t).padStart(3, '0'), VW - 60, hudY + 12, 'right', timeColor);
 
-    // 状态图标
+    // ===== 状态图标（左上角，HUD下方）=====
     var p = G.player;
     if (p) {
-      var ix = 6, iy = bossOn ? 52 : 22;
-      if (p.form === 'fire') { ctx.fillStyle = '#ff6b35'; ctx.fillText('火焰', ix, iy + 8); ix += 34; }
-      if (p.shield > 0) { ctx.fillStyle = '#7ce8ff'; ctx.fillText('护盾×' + p.shield, ix, iy + 8); ix += 48; }
-      if (p.speedT > 0) { ctx.fillStyle = '#7cf5ff'; ctx.fillText('极速 ' + p.speedT.toFixed(0), ix, iy + 8); ix += 46; }
-      if (p.starT > 0) { ctx.fillStyle = '#ffe066'; ctx.fillText('无敌 ' + p.starT.toFixed(0), ix, iy + 8); }
+      var ix = 30, iy = bossOn ? 56 : 36;
+      if (p.form === 'fire') {
+        drawPixelText('FIRE', ix, iy, 'left', '#ff8c42'); ix += 50;
+      }
+      if (p.shield > 0) {
+        drawPixelText('SHIELD×' + p.shield, ix, iy, 'left', '#7ce8ff'); ix += 80;
+      }
+      if (p.starT > 0) {
+        drawPixelText('STAR ' + Math.ceil(p.starT), ix, iy, 'left', '#ffe066');
+      }
     }
 
-    /* 星辰能量条 —— 回溯的燃料，左下角常驻 */
+    /* 星辰能量条 —— 左下角轻量化，无厚重背景 */
     var rw = PG.rewind;
-    ctx.fillStyle = 'rgba(10,6,20,.46)';
-    ctx.fillRect(0, VH - 20, 178, 20);
-    ctx.fillStyle = rw.energy > 0.18 ? '#9ff8ff' : '#ff7a9a';
-    ctx.fillText('星辰', 6, VH - 8);
-    PG.rewind.bar(ctx, 30, VH - 13, 86, 6, rw.energy);
+    var rwY = VH - 16;
+    // 小图标
+    ctx.fillStyle = '#7cf5ff';
+    ctx.beginPath();
+    ctx.moveTo(12, rwY - 8);
+    ctx.lineTo(15, rwY - 3);
+    ctx.lineTo(20, rwY - 2);
+    ctx.lineTo(16, rwY + 2);
+    ctx.lineTo(17, rwY + 8);
+    ctx.lineTo(12, rwY + 5);
+    ctx.lineTo(7, rwY + 8);
+    ctx.lineTo(8, rwY + 2);
+    ctx.lineTo(4, rwY - 2);
+    ctx.lineTo(9, rwY - 3);
+    ctx.closePath(); ctx.fill();
+
+    // 能量条（细条，无背景）
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(26, rwY - 2, 60, 4);
+    ctx.fillStyle = rw.energy > 0.18 ? '#7cf5ff' : '#ff7a9a';
+    ctx.fillRect(26, rwY - 2, 60 * rw.energy, 4);
+
+    // 提示文字
     if (rw.active) {
-      ctx.fillStyle = '#9ff8ff';
-      ctx.fillText('倒流中…', 122, VH - 8);
+      ctx.font = '9px "Courier New", monospace';
+      ctx.fillStyle = '#7cf5ff';
+      ctx.textAlign = 'left';
+      ctx.fillText('◀◀ 倒流', 92, rwY - 5);
     } else if (rw.can()) {
-      ctx.fillStyle = (Math.floor(G.t * 2.5) % 2 === 0) ? '#7cf5ff' : '#3d8fa8';
-      ctx.fillText('R 回溯', 122, VH - 8);
-    } else {
-      ctx.fillStyle = '#6a5f90';
-      ctx.fillText(rw.buf.length <= 2 ? '记录中…' : '能量不足', 122, VH - 8);
+      ctx.font = '9px "Courier New", monospace';
+      ctx.fillStyle = (Math.floor(G.t * 2.5) % 2 === 0) ? '#7cf5ff' : '#4a9aaa';
+      ctx.textAlign = 'left';
+      ctx.fillText('R 回溯', 92, rwY - 5);
     }
 
-    // 中央提示（有 BOSS 时让开血条）
+    // 中央提示（简洁横幅，白字黑描边）
     if (G.msg) {
-      var my = bossOn ? 52 : 34;
+      var my = bossOn ? 48 : 36;
+      ctx.font = 'bold 11px "Courier New", monospace';
       ctx.textAlign = 'center';
-      ctx.fillStyle = 'rgba(0,0,0,.6)';
-      var w = ctx.measureText(G.msg).width + 20;
-      ctx.fillRect(VW / 2 - w / 2, my, w, 18);
+      // 黑描边
+      ctx.fillStyle = '#000';
+      ctx.fillText(G.msg, VW / 2 + 1, my + 1);
+      ctx.fillText(G.msg, VW / 2 - 1, my - 1);
+      ctx.fillText(G.msg, VW / 2 + 1, my - 1);
+      ctx.fillText(G.msg, VW / 2 - 1, my + 1);
+      // 白字
       ctx.fillStyle = '#ffe066';
-      ctx.fillText(G.msg, VW / 2, my + 13);
+      ctx.fillText(G.msg, VW / 2, my);
       ctx.textAlign = 'left';
     }
 
@@ -600,193 +637,198 @@
 
   /* ---------------- 标题 / 地图 / 结算 ---------------- */
   function renderTitle() {
-    // Switch风格主菜单：简洁 + 大圆角卡片 + 红蓝配色
+    // 经典马里奥风格主菜单：蓝天背景 + 像素大标题 + 闪烁开始提示
     var ctx = uctx;
-    var g = ctx.createLinearGradient(0, 0, VW, VH);
-    g.addColorStop(0, '#1a1a2e'); g.addColorStop(0.5, '#16213e'); g.addColorStop(1, '#0f3460');
-    ctx.fillStyle = g; ctx.fillRect(0, 0, VW, VH);
 
-    // 背景装饰：柔和光斑
-    var t = G.t;
-    var grad1 = ctx.createRadialGradient(VW*0.2, VH*0.3, 0, VW*0.2, VH*0.3, 120);
-    grad1.addColorStop(0, 'rgba(255,0,80,0.15)'); grad1.addColorStop(1, 'transparent');
-    ctx.fillStyle = grad1; ctx.fillRect(0, 0, VW, VH);
-    var grad2 = ctx.createRadialGradient(VW*0.8, VH*0.7, 0, VW*0.8, VH*0.7, 140);
-    grad2.addColorStop(0, 'rgba(0,150,255,0.15)'); grad2.addColorStop(1, 'transparent');
-    ctx.fillStyle = grad2; ctx.fillRect(0, 0, VW, VH);
+    // 天空背景（马里奥经典蓝）
+    var skyGrad = ctx.createLinearGradient(0, 0, 0, VH);
+    skyGrad.addColorStop(0, '#5c94fc');
+    skyGrad.addColorStop(1, '#8cb8ff');
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, VW, VH);
+
+    // 远山（绿色山丘）
+    ctx.fillStyle = '#3aa83a';
+    ctx.beginPath();
+    ctx.moveTo(0, VH - 30);
+    ctx.quadraticCurveTo(60, VH - 80, 120, VH - 30);
+    ctx.quadraticCurveTo(180, VH - 70, 240, VH - 30);
+    ctx.quadraticCurveTo(320, VH - 90, 400, VH - 30);
+    ctx.quadraticCurveTo(440, VH - 60, 480, VH - 30);
+    ctx.lineTo(VW, VH);
+    ctx.lineTo(0, VH);
+    ctx.closePath();
+    ctx.fill();
+
+    // 地面
+    ctx.fillStyle = '#c84c0c';
+    ctx.fillRect(0, VH - 24, VW, 24);
+    ctx.fillStyle = '#e07030';
+    ctx.fillRect(0, VH - 24, VW, 6);
+
+    // 白云装饰
+    ctx.fillStyle = '#fff';
+    for (var c = 0; c < 4; c++) {
+      var cx = 40 + c * 120 + Math.sin(G.t * 0.5 + c) * 10;
+      var cy = 30 + (c % 2) * 25;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 10, 0, Math.PI*2);
+      ctx.arc(cx + 12, cy - 4, 8, 0, Math.PI*2);
+      ctx.arc(cx + 24, cy, 9, 0, Math.PI*2);
+      ctx.fill();
+    }
 
     ctx.textAlign = 'center';
 
-    // 顶部Logo区域
-    ctx.fillStyle = 'rgba(255,255,255,0.95)';
-    ctx.font = 'bold 32px "PingFang SC","Microsoft YaHei",sans-serif';
-    ctx.fillText('像素童话大陆', VW / 2, 78);
+    // 游戏标题（像素风大标题，红白配色）
+    ctx.font = 'bold 28px "Courier New", monospace';
+    // 黑色描边
+    ctx.fillStyle = '#000';
+    ctx.fillText('像素童话大陆', VW / 2 + 2, 72 + 2);
+    ctx.fillText('像素童话大陆', VW / 2 - 2, 72 - 2);
+    ctx.fillText('像素童话大陆', VW / 2 + 2, 72 - 2);
+    ctx.fillText('像素童话大陆', VW / 2 - 2, 72 + 2);
+    // 白色字
+    ctx.fillStyle = '#fff';
+    ctx.fillText('像素童话大陆', VW / 2, 72);
 
-    ctx.font = '11px "PingFang SC","Microsoft YaHei",sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,0.6)';
-    ctx.fillText('✦ 小星冒险家 ✦', VW / 2, 98);
-
-    // 中间主角展示卡片（Switch风格圆角卡片）
-    var cardY = 115;
-    ctx.fillStyle = 'rgba(255,255,255,0.08)';
-    roundRect(ctx, VW/2 - 55, cardY, 110, 95, 12); ctx.fill();
-    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
-    ctx.lineWidth = 1.5;
-    roundRect(ctx, VW/2 - 55, cardY, 110, 95, 12); ctx.stroke();
+    // 副标题
+    ctx.font = 'bold 12px "Courier New", monospace';
+    ctx.fillStyle = '#ffe066';
+    ctx.fillText('★ 小星冒险家 ★', VW / 2, 95);
 
     // 主角
-    var bob = Math.sin(t * 2) * 3;
-    PG.drawSpr(ctx, PG.SPR.heroIdle, VW / 2 - 8, cardY + 20 + bob, false, null);
+    var bob = Math.sin(G.t * 2) * 3;
+    PG.drawSpr(ctx, PG.SPR.heroIdle, VW / 2 - 6, 120 + bob, false, null);
 
-    // 底部开始按钮（Switch风格大按钮）
-    var btnY = 225;
-    var btnW = 160, btnH = 36;
-    var blink = Math.floor(t * 2.5) % 2;
+    // 开始提示（闪烁）
+    var blink = Math.floor(G.t * 2) % 2;
+    ctx.font = 'bold 11px "Courier New", monospace';
+    if (blink) {
+      ctx.fillStyle = '#fff';
+      ctx.fillText('PRESS ENTER TO START', VW / 2, 180);
+    }
 
-    // 按钮阴影
-    ctx.fillStyle = 'rgba(0,0,0,0.3)';
-    roundRect(ctx, VW/2 - btnW/2 + 2, btnY + 3, btnW, btnH, 18); ctx.fill();
-
-    // 按钮主体（Switch红）
-    var btnGrad = ctx.createLinearGradient(0, btnY, 0, btnY + btnH);
-    btnGrad.addColorStop(0, '#ff4757'); btnGrad.addColorStop(1, '#c0392b');
-    ctx.fillStyle = btnGrad;
-    roundRect(ctx, VW/2 - btnW/2, btnY, btnW, btnH, 18); ctx.fill();
-
-    // 按钮高光
-    ctx.fillStyle = 'rgba(255,255,255,0.2)';
-    roundRect(ctx, VW/2 - btnW/2, btnY, btnW, btnH/2, 18); ctx.fill();
-
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 14px "PingFang SC","Microsoft YaHei",sans-serif';
-    ctx.fillText('▶ 开始冒险', VW / 2, btnY + 23);
-
-    // 底部状态栏
-    ctx.font = '9px "PingFang SC","Microsoft YaHei",sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,0.4)';
-    ctx.fillText('已解锁 ' + PG.save.load().unlocked + '/5 世界  ·  星辰碎片 ' + PG.save.load().stars + '/30', VW / 2, 262);
+    // 底部信息
+    ctx.font = '9px "Courier New", monospace';
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.fillText('WORLDS: ' + PG.save.load().unlocked + '/5   STARS: ' + PG.save.load().stars + '/30', VW / 2, 250);
 
     ctx.textAlign = 'left';
   }
 
   function renderMap() {
-    // Switch风格选关界面：大圆角卡片 + 选中放大高亮
+    // 马里奥风格选关界面：像素风 + 世界卡片 + 星星评价
     var ctx = uctx;
-    var g = ctx.createLinearGradient(0, 0, VW, VH);
-    g.addColorStop(0, '#1a1a2e'); g.addColorStop(1, '#16213e');
-    ctx.fillStyle = g; ctx.fillRect(0, 0, VW, VH);
+
+    // 深色背景
+    ctx.fillStyle = '#0f0c29';
+    ctx.fillRect(0, 0, VW, VH);
+
+    // 背景装饰
+    ctx.fillStyle = 'rgba(255,255,255,0.03)';
+    for (var s = 0; s < 30; s++) {
+      var sx = (s * 97) % VW, sy = (s * 53) % VH;
+      ctx.fillRect(sx, sy, 2, 2);
+    }
 
     ctx.textAlign = 'center';
 
-    // 顶部标题栏
-    ctx.font = 'bold 18px "PingFang SC","Microsoft YaHei",sans-serif';
-    ctx.fillStyle = '#fff';
-    ctx.fillText('选择关卡', VW / 2, 32);
-    ctx.font = '9px "PingFang SC","Microsoft YaHei",sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,0.5)';
-    ctx.fillText('← → 选择世界    ↑ ↓ 选择关卡    Enter 开始', VW / 2, 48);
+    // 标题
+    ctx.font = 'bold 16px "Courier New", monospace';
+    ctx.fillStyle = '#ffe066';
+    ctx.fillText('SELECT WORLD', VW / 2, 28);
+    ctx.font = '9px "Courier New", monospace';
+    ctx.fillStyle = '#9b90bd';
+    ctx.fillText('← → 选择世界    ↑ ↓ 选择关卡    ENTER 开始', VW / 2, 44);
 
     var d = PG.save.load();
-    var n = 5, cw = 76, gap = 10;
-    var totalW = n * cw + (n - 1) * gap;
+    var n = 5;
+    var cardW = 82, cardH = 140, gap = 8;
+    var totalW = n * cardW + (n - 1) * gap;
     var x0 = (VW - totalW) / 2;
 
     for (var i = 0; i < n; i++) {
       var th = PG.WORLDS[i];
-      var isSel = i === G.selWorld;
+      var x = x0 + i * (cardW + gap);
+      var y = 60;
       var locked = (i + 1) > d.unlocked;
+      var sel = i === G.selWorld;
 
-      // 选中卡片放大效果
-      var scale = isSel ? 1.08 : 1;
-      var cardW = cw * scale;
-      var cardH = 155 * scale;
-      var x = x0 + i * (cw + gap) + (cw - cardW) / 2;
-      var y = 65;
+      // 卡片背景（像素风，无圆角）
+      ctx.fillStyle = locked ? '#1a1530' : '#2a2050';
+      ctx.fillRect(x, y, cardW, cardH);
+      ctx.strokeStyle = sel ? '#ffe066' : '#3a3060';
+      ctx.lineWidth = sel ? 3 : 1;
+      ctx.strokeRect(x, y, cardW, cardH);
 
-      // 卡片阴影
-      if (isSel) {
-        ctx.fillStyle = 'rgba(0,0,0,0.4)';
-        roundRect(ctx, x + 3, y + 4, cardW, cardH, 12); ctx.fill();
-      }
-
-      // 卡片背景
-      ctx.fillStyle = locked ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.12)';
-      roundRect(ctx, x, y, cardW, cardH, 12); ctx.fill();
-
-      // 选中边框（Switch蓝）
-      if (isSel) {
-        ctx.strokeStyle = '#00bfff';
-        ctx.lineWidth = 2.5;
-        roundRect(ctx, x, y, cardW, cardH, 12); ctx.stroke();
-      }
-
-      // 世界预览区（顶部色块）
-      var previewH = 45;
-      var previewGrad = ctx.createLinearGradient(x, y, x, y + previewH);
-      if (locked) {
-        previewGrad.addColorStop(0, 'rgba(255,255,255,0.1)');
-        previewGrad.addColorStop(1, 'rgba(255,255,255,0.05)');
+      // 世界预览色块（顶部）
+      var previewH = 40;
+      if (!locked) {
+        ctx.fillStyle = th.sky[0];
+        ctx.fillRect(x + 2, y + 2, cardW - 4, previewH);
+        ctx.fillStyle = th.sky[1] || th.sky[0];
+        ctx.fillRect(x + 2, y + previewH - 10, cardW - 4, 10);
       } else {
-        previewGrad.addColorStop(0, th.sky[0]);
-        previewGrad.addColorStop(1, th.sky[1] || th.sky[0]);
+        ctx.fillStyle = '#252045';
+        ctx.fillRect(x + 2, y + 2, cardW - 4, previewH);
       }
-      ctx.fillStyle = previewGrad;
-      roundRect(ctx, x, y, cardW, previewH, 12); ctx.fill();
-      ctx.fillStyle = locked ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.15)';
-      ctx.fillRect(x, y + previewH - 8, cardW, 8);
 
       // 世界名称
-      ctx.font = 'bold 11px "PingFang SC","Microsoft YaHei",sans-serif';
-      ctx.fillStyle = locked ? 'rgba(255,255,255,0.3)' : '#fff';
-      ctx.fillText(th.name, x + cardW / 2, y + 18);
-      ctx.font = '8px "PingFang SC","Microsoft YaHei",sans-serif';
-      ctx.fillStyle = locked ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.8)';
-      ctx.fillText(locked ? '🔒 未解锁' : '第' + (i+1) + '世界', x + cardW / 2, y + 32);
+      ctx.font = 'bold 11px "Courier New", monospace';
+      ctx.fillStyle = locked ? '#5a5080' : '#fff';
+      ctx.fillText(th.name, x + cardW / 2, y + 16);
+      ctx.font = '8px "Courier New", monospace';
+      ctx.fillStyle = locked ? '#4a4070' : '#c0b8e0';
+      ctx.fillText(locked ? 'LOCKED' : 'WORLD ' + (i+1), x + cardW / 2, y + 30);
 
       // 关卡列表
       for (var l = 0; l < 3; l++) {
         var ly = y + previewH + 10 + l * 28;
         var info = d.levels[i + '-' + l] || { stars: 0, cleared: false };
         var lvLocked = locked;
-        var isLvSel = isSel && l === G.selLevel;
+        var isSel = sel && l === G.selLevel;
 
-        // 关卡按钮背景
-        ctx.fillStyle = isLvSel ? 'rgba(0,191,255,0.25)' : 'rgba(255,255,255,0.08)';
-        roundRect(ctx, x + 8, ly, cardW - 16, 22, 6); ctx.fill();
+        // 选中关卡高亮
+        if (isSel) {
+          ctx.fillStyle = 'rgba(255,224,102,0.3)';
+          ctx.fillRect(x + 6, ly, cardW - 12, 22);
+          ctx.strokeStyle = '#ffe066';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(x + 6, ly, cardW - 12, 22);
+        }
 
-        // 关卡名称
-        ctx.font = '9px "PingFang SC","Microsoft YaHei",sans-serif';
-        ctx.fillStyle = lvLocked ? 'rgba(255,255,255,0.25)' : '#fff';
+        ctx.font = '9px "Courier New", monospace';
+        ctx.fillStyle = lvLocked ? '#4a4070' : '#e0d8ff';
         ctx.textAlign = 'left';
-        var label = l === 2 ? 'BOSS' : '关卡 ' + (l+1);
-        ctx.fillText(label, x + 14, ly + 15);
+        var label = l === 2 ? 'BOSS' : (i+1) + '-' + (l+1);
+        ctx.fillText(label, x + 12, ly + 15);
 
-        // 星级
+        // 星星
         if (!lvLocked && info.stars > 0) {
           ctx.textAlign = 'right';
-          ctx.font = '8px "PingFang SC",sans-serif';
+          ctx.font = '8px "Courier New", monospace';
           ctx.fillStyle = '#ffd700';
-          ctx.fillText('★'.repeat(info.stars), x + cardW - 14, ly + 15);
+          ctx.fillText('★'.repeat(info.stars), x + cardW - 10, ly + 15);
         }
         ctx.textAlign = 'center';
       }
     }
 
-    // 底部详情栏
-    var th2 = PG.WORLDS[G.selWorld];
-    ctx.fillStyle = 'rgba(0,0,0,0.3)';
-    roundRect(ctx, 30, 238, VW - 60, 24, 8); ctx.fill();
-
-    ctx.font = '9px "PingFang SC","Microsoft YaHei",sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    // 底部说明
+    ctx.font = '9px "Courier New", monospace';
+    ctx.fillStyle = '#8d80b8';
     var desc = [
-      '阳光草地，机关简单，适合新手入门',
-      '薄雾森林，高低错落，飞行怪物出没',
-      '黄沙沙漠，流沙减速，塌陷砖块陷阱',
-      '寒冰冰川，地面打滑，寒冰精灵减速',
-      '黑暗城堡，强敌齐聚，终极BOSS战'
+      '草原世界 · 适合新手入门',
+      '森林世界 · 高低错落地形',
+      '沙漠世界 · 流沙减速陷阱',
+      '冰川世界 · 地面打滑冰面',
+      '城堡世界 · 终极BOSS决战'
     ][G.selWorld];
-    ctx.fillText(desc, VW / 2, 253);
+    ctx.fillText(desc, VW / 2, 225);
+    ctx.fillStyle = '#6a5f90';
+    ctx.font = '8px "Courier New", monospace';
+    ctx.fillText('ENTER 出发    ESC 返回标题', VW / 2, 245);
 
     ctx.textAlign = 'left';
   }
