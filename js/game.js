@@ -476,52 +476,51 @@
   }
 
   function drawHUD() {
-    // 整段改画到原生分辨率 UI 层：坐标不变，字变清晰
+    // Switch风格HUD：简洁圆角卡片 + 半透明毛玻璃感
     var ctx = uctx;
     var lv = G.lv;
-    // BOSS 血条占着 HUD 正下方那条带（y=20..41），下面几处都要给它让位
     var bossRef = null;
     for (var bi = 0; bi < G.ents.length; bi++) {
       var be = G.ents[bi];
       if (be.type === 'boss' && !be.dead && be.hp > 0) { bossRef = be; break; }
     }
     var bossOn = !!bossRef;
-    ctx.font = '9px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.font = 'bold 9px "PingFang SC","Microsoft YaHei",sans-serif';
     ctx.textAlign = 'left';
 
-    // 半透明底
-    ctx.fillStyle = 'rgba(10,6,20,.42)';
-    ctx.fillRect(0, 0, VW, 16);
+    // 顶部HUD栏（Switch风格圆角半透明）
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    roundRect(ctx, 4, 4, VW - 8, 18, 9); ctx.fill();
 
     var th = PG.WORLDS[lv.world];
     ctx.fillStyle = '#fff';
-    ctx.fillText((lv.isBonus ? '密室彩蛋' : th.name + ' · ' + (lv.index + 1) + '-关'), 6, 11);
+    ctx.fillText((lv.isBonus ? '✦ 密室彩蛋' : th.name + ' ' + (lv.index + 1) + '-1'), 12, 16);
 
     // 金币
-    ctx.fillStyle = '#ffe066';
-    ctx.fillRect(150, 5, 6, 7);
-    ctx.fillStyle = '#c9922a';
-    ctx.fillRect(151, 6, 4, 5);
+    ctx.fillStyle = '#ffd700';
+    ctx.beginPath(); ctx.arc(148, 12, 4, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#b8860b';
+    ctx.beginPath(); ctx.arc(148, 12, 2.5, 0, Math.PI*2); ctx.fill();
     ctx.fillStyle = '#fff';
-    ctx.fillText('×' + G.coins, 160, 11);
+    ctx.fillText('×' + G.coins, 156, 16);
 
     // 星星
-    ctx.fillStyle = '#ffe066';
-    ctx.fillText('★ ' + G.stars + '/3', 200, 11);
+    ctx.fillStyle = '#ffd700';
+    ctx.fillText('★' + G.stars + '/3', 190, 16);
 
     // 生命
-    ctx.fillStyle = '#ff5a7a';
-    ctx.fillText('♥ ×' + Math.max(0, G.lives), 250, 11);
+    ctx.fillStyle = '#ff4757';
+    ctx.fillText('♥' + Math.max(0, G.lives), 225, 16);
 
     // 得分
-    ctx.fillStyle = '#cfe6ff';
-    ctx.fillText('SCORE ' + G.score, 300, 11);
+    ctx.fillStyle = '#7cf5ff';
+    ctx.fillText('分数 ' + G.score, 260, 16);
 
     // 时间
     var t = Math.ceil(G.time);
-    ctx.fillStyle = t < 30 ? (Math.floor(G.t * 6) % 2 ? '#ff5a7a' : '#fff') : '#fff';
+    ctx.fillStyle = t < 30 ? (Math.floor(G.t * 6) % 2 ? '#ff4757' : '#fff') : '#fff';
     ctx.textAlign = 'right';
-    ctx.fillText('⏱ ' + t, VW - 6, 11);
+    ctx.fillText('⏱ ' + t + 's', VW - 12, 16);
     ctx.textAlign = 'left';
 
     // 状态图标
@@ -601,171 +600,194 @@
 
   /* ---------------- 标题 / 地图 / 结算 ---------------- */
   function renderTitle() {
-    // 标题页整页都是 UI：改画到原生分辨率层
+    // Switch风格主菜单：简洁 + 大圆角卡片 + 红蓝配色
     var ctx = uctx;
-    var g = ctx.createLinearGradient(0, 0, 0, VH);
-    g.addColorStop(0, '#2b1f4d'); g.addColorStop(1, '#0f0a1c');
+    var g = ctx.createLinearGradient(0, 0, VW, VH);
+    g.addColorStop(0, '#1a1a2e'); g.addColorStop(0.5, '#16213e'); g.addColorStop(1, '#0f3460');
     ctx.fillStyle = g; ctx.fillRect(0, 0, VW, VH);
 
-    for (var s = 0; s < 70; s++) {
-      var sx = (s * 97) % VW, sy = (s * 53) % VH;
-      ctx.fillStyle = 'rgba(255,255,255,' + (0.15 + 0.5 * Math.abs(Math.sin(G.t * 2 + s))) + ')';
-      ctx.fillRect(sx, sy, 1, 1);
-    }
-
-    // 轻量界面装饰：月晕、顶部章节签和半透明操作卡片
-    ctx.strokeStyle = 'rgba(124,245,255,.13)';
-    ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.arc(VW / 2, 112, 74, 0, Math.PI * 2); ctx.stroke();
-    ctx.beginPath(); ctx.arc(VW / 2, 112, 86, 0, Math.PI * 2); ctx.stroke();
-    ctx.fillStyle = 'rgba(255,255,255,.06)';
-    roundRect(ctx, 18, 14, 88, 18, 9); ctx.fill();
-    ctx.font = 'bold 8px "PingFang SC","Microsoft YaHei",sans-serif';
-    ctx.fillStyle = '#9ff8ff';
-    ctx.textAlign = 'center';
-    ctx.fillText('CHAPTER 01 · 星之旅', 62, 26);
-
-    ctx.fillStyle = 'rgba(10,6,22,.58)';
-    roundRect(ctx, 66, 150, 348, 52, 9); ctx.fill();
-    ctx.strokeStyle = 'rgba(255,255,255,.10)';
-    roundRect(ctx, 66, 150, 348, 52, 9); ctx.stroke();
+    // 背景装饰：柔和光斑
+    var t = G.t;
+    var grad1 = ctx.createRadialGradient(VW*0.2, VH*0.3, 0, VW*0.2, VH*0.3, 120);
+    grad1.addColorStop(0, 'rgba(255,0,80,0.15)'); grad1.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad1; ctx.fillRect(0, 0, VW, VH);
+    var grad2 = ctx.createRadialGradient(VW*0.8, VH*0.7, 0, VW*0.8, VH*0.7, 140);
+    grad2.addColorStop(0, 'rgba(0,150,255,0.15)'); grad2.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad2; ctx.fillRect(0, 0, VW, VH);
 
     ctx.textAlign = 'center';
-    ctx.font = 'bold 30px "PingFang SC","Microsoft YaHei",sans-serif';
-    ctx.fillStyle = '#000';
-    ctx.fillText('像素童话大陆', VW / 2 + 2, 84 + 2);
-    var tg = ctx.createLinearGradient(0, 58, 0, 90);
-    tg.addColorStop(0, '#ffe066'); tg.addColorStop(1, '#ff8c42');
-    ctx.fillStyle = tg;
-    ctx.fillText('像素童话大陆', VW / 2, 84);
 
-    ctx.font = '12px "PingFang SC","Microsoft YaHei",sans-serif';
-    ctx.fillStyle = '#9be36a';
-    ctx.fillText('小 星 冒 险 家', VW / 2, 106);
+    // 顶部Logo区域
+    ctx.fillStyle = 'rgba(255,255,255,0.95)';
+    ctx.font = 'bold 32px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.fillText('像素童话大陆', VW / 2, 78);
 
-    // 主角站台
-    var bob = Math.sin(G.t * 2) * 3;
-    PG.drawSpr(ctx, PG.SPR.heroIdle, VW / 2 - 6, 128 + bob, false, null);
+    ctx.font = '11px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.fillText('✦ 小星冒险家 ✦', VW / 2, 98);
 
+    // 中间主角展示卡片（Switch风格圆角卡片）
+    var cardY = 115;
+    ctx.fillStyle = 'rgba(255,255,255,0.08)';
+    roundRect(ctx, VW/2 - 55, cardY, 110, 95, 12); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    ctx.lineWidth = 1.5;
+    roundRect(ctx, VW/2 - 55, cardY, 110, 95, 12); ctx.stroke();
+
+    // 主角
+    var bob = Math.sin(t * 2) * 3;
+    PG.drawSpr(ctx, PG.SPR.heroIdle, VW / 2 - 8, cardY + 20 + bob, false, null);
+
+    // 底部开始按钮（Switch风格大按钮）
+    var btnY = 225;
+    var btnW = 160, btnH = 36;
+    var blink = Math.floor(t * 2.5) % 2;
+
+    // 按钮阴影
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    roundRect(ctx, VW/2 - btnW/2 + 2, btnY + 3, btnW, btnH, 18); ctx.fill();
+
+    // 按钮主体（Switch红）
+    var btnGrad = ctx.createLinearGradient(0, btnY, 0, btnY + btnH);
+    btnGrad.addColorStop(0, '#ff4757'); btnGrad.addColorStop(1, '#c0392b');
+    ctx.fillStyle = btnGrad;
+    roundRect(ctx, VW/2 - btnW/2, btnY, btnW, btnH, 18); ctx.fill();
+
+    // 按钮高光
+    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+    roundRect(ctx, VW/2 - btnW/2, btnY, btnW, btnH/2, 18); ctx.fill();
+
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 14px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.fillText('▶ 开始冒险', VW / 2, btnY + 23);
+
+    // 底部状态栏
     ctx.font = '9px "PingFang SC","Microsoft YaHei",sans-serif';
-    ctx.fillStyle = '#cfe6ff';
-    ctx.fillText('← →  移动     Z / 空格  跳跃     X / Shift  冲刺·火球', VW / 2, 165);
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.fillText('已解锁 ' + PG.save.load().unlocked + '/5 世界  ·  星辰碎片 ' + PG.save.load().stars + '/30', VW / 2, 262);
 
-    /* 核心机制单独高亮一行，别埋进按键列表里 */
-    var rp = 0.68 + 0.32 * Math.sin(G.t * 2.6);
-    ctx.font = 'bold 11px "PingFang SC","Microsoft YaHei",sans-serif';
-    ctx.fillStyle = 'rgba(124,245,255,' + rp.toFixed(2) + ')';
-    ctx.fillText('R  星辰回溯 · 把时间拨回去 5 秒', VW / 2, 183);
-    ctx.font = '8px "PingFang SC","Microsoft YaHei",sans-serif';
-    ctx.fillStyle = '#9387b8';
-    ctx.fillText('倒流留下的轨迹，将凝成一座「残影之桥」', VW / 2, 196);
-
-    var blink = Math.floor(G.t * 2) % 2;
-    ctx.fillStyle = blink ? 'rgba(255,224,102,.2)' : 'rgba(138,108,255,.18)';
-    roundRect(ctx, 146, 207, 188, 26, 13); ctx.fill();
-    ctx.strokeStyle = blink ? 'rgba(255,224,102,.6)' : 'rgba(138,108,255,.45)';
-    roundRect(ctx, 146, 207, 188, 26, 13); ctx.stroke();
-    ctx.fillStyle = blink ? '#ffe066' : '#c9bcff';
-    ctx.font = 'bold 11px "PingFang SC","Microsoft YaHei",sans-serif';
-    ctx.fillText('ENTER / 空格  开始冒险', VW / 2, 224);
-
-    ctx.font = '9px "PingFang SC","Microsoft YaHei",sans-serif';
-    ctx.fillStyle = '#6a5f90';
-    ctx.fillText('进度：已解锁 ' + PG.save.load().unlocked + '/5 个世界   星辰碎片 ' + PG.save.load().stars + '/30   （Delete 清空存档）', VW / 2, 248);
     ctx.textAlign = 'left';
   }
 
   function renderMap() {
-    // 秘境地图整页都是 UI：改画到原生分辨率层
+    // Switch风格选关界面：大圆角卡片 + 选中放大高亮
     var ctx = uctx;
-    var g = ctx.createLinearGradient(0, 0, 0, VH);
-    g.addColorStop(0, '#1c1436'); g.addColorStop(1, '#0d0819');
+    var g = ctx.createLinearGradient(0, 0, VW, VH);
+    g.addColorStop(0, '#1a1a2e'); g.addColorStop(1, '#16213e');
     ctx.fillStyle = g; ctx.fillRect(0, 0, VW, VH);
 
     ctx.textAlign = 'center';
-    ctx.font = 'bold 13px "PingFang SC","Microsoft YaHei",sans-serif';
-    ctx.fillStyle = '#ffe066';
-    ctx.fillText('选择秘境   ← → 换世界   ↑ ↓ 换关卡   Enter 出发', VW / 2, 22);
+
+    // 顶部标题栏
+    ctx.font = 'bold 18px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.fillStyle = '#fff';
+    ctx.fillText('选择关卡', VW / 2, 32);
+    ctx.font = '9px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.fillText('← → 选择世界    ↑ ↓ 选择关卡    Enter 开始', VW / 2, 48);
 
     var d = PG.save.load();
-    var n = 5, cw = 84, gap = 6;
+    var n = 5, cw = 76, gap = 10;
     var totalW = n * cw + (n - 1) * gap;
     var x0 = (VW - totalW) / 2;
 
     for (var i = 0; i < n; i++) {
       var th = PG.WORLDS[i];
-      var x = x0 + i * (cw + gap), y = 44, h = 168;
+      var isSel = i === G.selWorld;
       var locked = (i + 1) > d.unlocked;
-      var sel = i === G.selWorld;
 
-      ctx.fillStyle = locked ? 'rgba(30,24,50,.85)' : 'rgba(40,30,72,.9)';
-      roundRect(ctx, x, y, cw, h, 6); ctx.fill();
+      // 选中卡片放大效果
+      var scale = isSel ? 1.08 : 1;
+      var cardW = cw * scale;
+      var cardH = 155 * scale;
+      var x = x0 + i * (cw + gap) + (cw - cardW) / 2;
+      var y = 65;
 
-      // 顶部色带
-      ctx.fillStyle = locked ? '#2a2340' : th.sky[0];
-      roundRect(ctx, x, y, cw, 34, 6); ctx.fill();
-      ctx.fillStyle = locked ? '#3a3355' : th.sky[1];
-      ctx.fillRect(x, y + 24, cw, 10);
+      // 卡片阴影
+      if (isSel) {
+        ctx.fillStyle = 'rgba(0,0,0,0.4)';
+        roundRect(ctx, x + 3, y + 4, cardW, cardH, 12); ctx.fill();
+      }
 
+      // 卡片背景
+      ctx.fillStyle = locked ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.12)';
+      roundRect(ctx, x, y, cardW, cardH, 12); ctx.fill();
+
+      // 选中边框（Switch蓝）
+      if (isSel) {
+        ctx.strokeStyle = '#00bfff';
+        ctx.lineWidth = 2.5;
+        roundRect(ctx, x, y, cardW, cardH, 12); ctx.stroke();
+      }
+
+      // 世界预览区（顶部色块）
+      var previewH = 45;
+      var previewGrad = ctx.createLinearGradient(x, y, x, y + previewH);
+      if (locked) {
+        previewGrad.addColorStop(0, 'rgba(255,255,255,0.1)');
+        previewGrad.addColorStop(1, 'rgba(255,255,255,0.05)');
+      } else {
+        previewGrad.addColorStop(0, th.sky[0]);
+        previewGrad.addColorStop(1, th.sky[1] || th.sky[0]);
+      }
+      ctx.fillStyle = previewGrad;
+      roundRect(ctx, x, y, cardW, previewH, 12); ctx.fill();
+      ctx.fillStyle = locked ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.15)';
+      ctx.fillRect(x, y + previewH - 8, cardW, 8);
+
+      // 世界名称
       ctx.font = 'bold 11px "PingFang SC","Microsoft YaHei",sans-serif';
-      ctx.fillStyle = locked ? '#6a5f90' : '#fff';
-      ctx.fillText(th.name, x + cw / 2, y + 16);
+      ctx.fillStyle = locked ? 'rgba(255,255,255,0.3)' : '#fff';
+      ctx.fillText(th.name, x + cardW / 2, y + 18);
       ctx.font = '8px "PingFang SC","Microsoft YaHei",sans-serif';
-      ctx.fillStyle = locked ? '#4a4166' : 'rgba(255,255,255,.75)';
-      ctx.fillText(th.sub, x + cw / 2, y + 28);
+      ctx.fillStyle = locked ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.8)';
+      ctx.fillText(locked ? '🔒 未解锁' : '第' + (i+1) + '世界', x + cardW / 2, y + 32);
 
-      // 世界小图标
-      var iy = y + 48;
-      ctx.fillStyle = locked ? '#3a3355' : th.hill[0];
-      ctx.beginPath();
-      ctx.moveTo(x + 12, iy + 22); ctx.lineTo(x + cw / 2, iy - 4); ctx.lineTo(x + cw - 12, iy + 22);
-      ctx.closePath(); ctx.fill();
-      ctx.fillStyle = locked ? '#4a4166' : th.top;
-      ctx.fillRect(x + 12, iy + 22, cw - 24, 4);
-
-      // 关卡行
+      // 关卡列表
       for (var l = 0; l < 3; l++) {
-        var ly = y + 86 + l * 24;
+        var ly = y + previewH + 10 + l * 28;
         var info = d.levels[i + '-' + l] || { stars: 0, cleared: false };
         var lvLocked = locked;
-        var isSel = sel && l === G.selLevel;
-        ctx.fillStyle = isSel ? 'rgba(255,224,102,.22)' : 'rgba(255,255,255,.05)';
-        roundRect(ctx, x + 8, ly, cw - 16, 20, 4); ctx.fill();
-        if (isSel) { ctx.strokeStyle = '#ffe066'; ctx.lineWidth = 1; roundRect(ctx, x + 8, ly, cw - 16, 20, 4); ctx.stroke(); }
+        var isLvSel = isSel && l === G.selLevel;
 
+        // 关卡按钮背景
+        ctx.fillStyle = isLvSel ? 'rgba(0,191,255,0.25)' : 'rgba(255,255,255,0.08)';
+        roundRect(ctx, x + 8, ly, cardW - 16, 22, 6); ctx.fill();
+
+        // 关卡名称
         ctx.font = '9px "PingFang SC","Microsoft YaHei",sans-serif';
-        ctx.fillStyle = lvLocked ? '#4a4166' : '#e8e2ff';
+        ctx.fillStyle = lvLocked ? 'rgba(255,255,255,0.25)' : '#fff';
         ctx.textAlign = 'left';
-        var label = l === 2 ? 'BOSS 关' : (l + 1) + '-关';
-        ctx.fillText(lvLocked ? '🔒 ' + label : label, x + 13, ly + 14);
-        ctx.textAlign = 'right';
-        if (!lvLocked) {
-          for (var s2 = 0; s2 < 3; s2++) {
-            ctx.fillStyle = s2 < info.stars ? '#ffe066' : 'rgba(255,255,255,.18)';
-            ctx.fillText('★', x + cw - 12 - (2 - s2) * 8, ly + 14);
-          }
-          if (info.cleared) { ctx.fillStyle = '#7cf5ff'; ctx.fillText('✓', x + cw - 46, ly + 14); }
+        var label = l === 2 ? 'BOSS' : '关卡 ' + (l+1);
+        ctx.fillText(label, x + 14, ly + 15);
+
+        // 星级
+        if (!lvLocked && info.stars > 0) {
+          ctx.textAlign = 'right';
+          ctx.font = '8px "PingFang SC",sans-serif';
+          ctx.fillStyle = '#ffd700';
+          ctx.fillText('★'.repeat(info.stars), x + cardW - 14, ly + 15);
         }
         ctx.textAlign = 'center';
       }
-      ctx.textAlign = 'center';
     }
 
-    // 当前世界详情
+    // 底部详情栏
     var th2 = PG.WORLDS[G.selWorld];
-    ctx.font = '10px "PingFang SC","Microsoft YaHei",sans-serif';
-    ctx.fillStyle = '#cfe6ff';
-    var desc = [
-      '阳光草地，机关简单，藏着不少隐形砖块与密室入口。',
-      '薄雾笼罩，地形高低错落，飞行怪物遍布林间。',
-      '黄沙漫天，流沙减速、塌陷砖块，关卡限时更紧。',
-      '地面打滑、平台狭窄，寒冰精灵会让你减速。',
-      '黑暗笼罩，全部高阶怪物齐聚，终点是暗影领主。'
-    ][G.selWorld];
-    ctx.fillText(desc, VW / 2, 232);
-    ctx.fillStyle = '#8d80b8';
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    roundRect(ctx, 30, 238, VW - 60, 24, 8); ctx.fill();
+
     ctx.font = '9px "PingFang SC","Microsoft YaHei",sans-serif';
-    ctx.fillText('Enter 出发    Esc 返回标题    Delete 清空存档', VW / 2, 252);
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    var desc = [
+      '阳光草地，机关简单，适合新手入门',
+      '薄雾森林，高低错落，飞行怪物出没',
+      '黄沙沙漠，流沙减速，塌陷砖块陷阱',
+      '寒冰冰川，地面打滑，寒冰精灵减速',
+      '黑暗城堡，强敌齐聚，终极BOSS战'
+    ][G.selWorld];
+    ctx.fillText(desc, VW / 2, 253);
+
     ctx.textAlign = 'left';
   }
 
