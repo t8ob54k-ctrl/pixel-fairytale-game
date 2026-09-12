@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="6SoLaEvWQAu5ShVGUrMSAg">
+<head data-page-node-id="AjpA6grsYfDRXcWGRaGtYj">
+<meta charset="utf-8" data-page-node-id="O5ciBCa1grcUoKZJnFv0LN">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,minimal-ui" data-page-node-id="G3kW31f767wiAeopECLsX5">
+<meta name="apple-mobile-web-app-capable" content="yes" data-page-node-id="Y5ioCkYMzdehY5KFoLJ0rU">
+<meta name="mobile-web-app-capable" content="yes" data-page-node-id="sqDB6tCrFszKc62owZQ0ME">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" data-page-node-id="jTsvx2a7Guxs6gPPNI80mh">
+<meta name="theme-color" content="#0b0716" data-page-node-id="AQU5IKO4fg66AAaaQam5Wk">
+<title>像素童话大陆 · 小星冒险家</title>
+<meta name="description" content="致敬经典横版闯关的像素冒险游戏：五大世界、踩怪顶砖、道具变身、隐藏密室与终极 BOSS。" data-page-node-id="PmwXD4kq7hgidFox8idVzX">
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  :root{
+    --ink:#090612;
+    --panel:#171027;
+    --line:#49396e;
+    --violet:#8a6cff;
+    --cyan:#7cf5ff;
+    --gold:#ffe066;
+    --muted:#9b90bd;
+  }
+  html,body{
+    margin:0;padding:0;width:100%;height:100%;
+    background:
+      radial-gradient(circle at 18% 20%,rgba(124,245,255,.08),transparent 22%),
+      radial-gradient(circle at 82% 72%,rgba(138,108,255,.13),transparent 26%),
+      radial-gradient(1100px 680px at 50% -12%,#332557 0%,#160e2b 52%,var(--ink) 100%);
+    color:#f4f0ff;
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    overflow:hidden;
+    overscroll-behavior:none;
+    display:flex;align-items:center;justify-content:center;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;opacity:.42;
+    background-image:
+      radial-gradient(circle,#fff 0 1px,transparent 1.2px),
+      radial-gradient(circle,var(--cyan) 0 1px,transparent 1.2px);
+    background-size:78px 78px,116px 116px;
+    background-position:12px 18px,48px 52px;
+    mask-image:linear-gradient(to bottom,rgba(0,0,0,.9),transparent 82%);
+  }
+  #wrap{
+    position:relative;
+    display:flex;align-items:center;justify-content:center;
+    width:100%;height:100%;
+  }
+  #wrap::before{
+    content:"PIXEL FAIRYTALE";position:fixed;left:18px;top:15px;
+    color:rgba(255,255,255,.5);font-size:10px;font-weight:800;letter-spacing:.22em;
+    text-shadow:0 0 18px rgba(124,245,255,.35);pointer-events:none;
+  }
+  #stage{
+    position:relative;
+    line-height:0;
+    border-radius:12px;
+    overflow:hidden;
+    isolation:isolate;
+    background:#000;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,.18),
+      0 0 0 4px #251a3d,
+      0 0 0 6px #090611,
+      0 24px 70px rgba(0,0,0,.72),
+      0 0 100px rgba(138,108,255,.2);
+  }
+  #stage::after{
+    content:"";position:absolute;inset:0;z-index:4;pointer-events:none;
+    border:1px solid rgba(255,255,255,.12);border-radius:11px;
+    box-shadow:inset 0 0 28px rgba(5,2,12,.32);
+  }
+  /* 世界层：低分辨率 + 最近邻放大，保持像素锐利 */
+  #screen{
+    display:block;
+    image-rendering:pixelated;
+    image-rendering:-moz-crisp-edges;
+    image-rendering:crisp-edges;
+    background:#000;
+    touch-action:none;
+  }
+  /* 扫描线只盖世界层，不糊 UI 文字。
+     注意必须显式铺满：#scan 是绝对定位且没有内容，
+     不给 right/bottom 的话会收缩成 0×0，等于从来没显示过。 */
+  #scan{
+    position:absolute;inset:0;z-index:2;pointer-events:none;
+    background:repeating-linear-gradient(to bottom,rgba(0,0,0,.13) 0 1px,rgba(0,0,0,0) 1px 3px);
+    mix-blend-mode:multiply;opacity:.38;
+  }
+  /* UI 层：原生分辨率，文字与图标清晰 */
+  #ui{
+    position:absolute;left:0;top:0;z-index:3;
+    pointer-events:none;
+    background:transparent;
+  }
+  /* 桌面端底部操作提示 */
+  #hint{
+    position:fixed;left:50%;bottom:10px;z-index:10;
+    display:flex;align-items:center;justify-content:center;gap:12px;
+    max-width:calc(100vw - 28px);padding:7px 12px;
+    transform:translateX(-50%);white-space:nowrap;
+    border:1px solid rgba(255,255,255,.09);border-radius:999px;
+    background:rgba(12,8,24,.72);box-shadow:0 8px 28px rgba(0,0,0,.25);
+    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+    color:var(--muted);font-size:10px;letter-spacing:.03em;
+    pointer-events:none;user-select:none;
+  }
+  #hint span{display:inline-flex;align-items:center;gap:5px;}
+  #hint kbd{
+    min-width:20px;padding:3px 5px;border:1px solid rgba(255,255,255,.16);border-bottom-color:rgba(255,255,255,.3);
+    border-radius:5px;background:rgba(255,255,255,.07);color:#eee8ff;
+    font:700 9px/1 -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;text-align:center;
+    box-shadow:inset 0 -1px rgba(255,255,255,.06);
+  }
+  #hint .rewind{color:var(--cyan);}
+  #hint .rewind kbd{border-color:rgba(124,245,255,.36);background:rgba(124,245,255,.1);color:var(--cyan);}
+  body.touch #hint{display:none;}
+  @media (max-width:900px),(max-height:620px){
+    #wrap::before{display:none;}
+    #hint{gap:7px;padding:6px 9px;}
+    #hint .optional{display:none;}
+  }
+
+  /* 移动端虚拟按键（横屏时贴在左右下角） */
+  #touch{
+    position:fixed;inset:auto 0 0 0;
+    display:none;
+    justify-content:space-between;
+    align-items:flex-end;
+    padding:0 16px calc(12px + env(safe-area-inset-bottom)) 16px;
+    pointer-events:none;
+    z-index:20;
+  }
+  #touch .pad{display:flex;align-items:flex-end;gap:12px;pointer-events:auto;}
+  #touch button{
+    width:58px;height:58px;border-radius:18px;
+    border:1px solid rgba(255,255,255,.34);
+    background:linear-gradient(145deg,rgba(70,50,112,.78),rgba(25,16,48,.82));
+    color:#fff;font-size:17px;font-weight:800;
+    box-shadow:inset 0 1px rgba(255,255,255,.16),0 8px 22px rgba(0,0,0,.28);
+    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+    user-select:none;padding:0;transition:transform .08s ease,background .08s ease;
+  }
+  #touch button:active,#touch button.on{background:linear-gradient(145deg,#9a83ff,#6545d2);transform:translateY(2px) scale(.94);}
+  /* 星辰回溯键：单独一个冷色，跟跳跃区分开 */
+  #touch button.rw{
+    width:50px;height:50px;font-size:13px;letter-spacing:-.04em;
+    border-color:rgba(124,245,255,.55);
+    background:rgba(16,64,88,.72);
+    color:#9ff8ff;
+  }
+  #touch button.rw:active,#touch button.rw.on{background:rgba(70,200,235,.85);color:#04141c;}
+  body.touch #touch{display:flex;}
+
+  /* 竖屏遮罩：请旋转设备 */
+  #rotate{
+    position:fixed;inset:0;z-index:60;
+    display:none;
+    flex-direction:column;align-items:center;justify-content:center;
+    gap:18px;text-align:center;padding:24px;
+    background:linear-gradient(180deg,#150e28,#0b0716);
+  }
+  body.need-rotate #rotate{display:flex;}
+  body.need-rotate #stage,
+  body.need-rotate #touch,
+  body.need-rotate #hint{display:none !important;}
+  #rotate .phone{
+    width:64px;height:104px;border:3px solid #7a6fa8;border-radius:12px;
+    position:relative;animation:rot 1.8s ease-in-out infinite;
+  }
+  #rotate .phone::after{
+    content:"";position:absolute;left:50%;bottom:6px;width:18px;height:3px;
+    background:#7a6fa8;border-radius:2px;transform:translateX(-50%);
+  }
+  @keyframes rot{
+    0%,35%{transform:rotate(0deg);}
+    60%,100%{transform:rotate(-90deg);}
+  }
+  #rotate h2{margin:0;font-size:17px;color:#ffe066;letter-spacing:.05em;}
+  #rotate p{margin:0;font-size:12px;color:#8d80b8;line-height:1.7;}
+</style>
+</head>
+<body data-page-node-id="F60L1c9Za8AtzcYd019mmq">
+  <div id="wrap" data-page-node-id="Va56XPar7Svieaae9EqkH8">
+    <div id="stage" data-page-node-id="16vtvXY4Ql7gaHeCa7T8cx">
+      <canvas id="screen" width="480" height="272" data-page-node-id="C7mijpalkk5jhC6AldFbBC"></canvas>
+      <div id="scan" data-page-node-id="4SRjrRcW0u381d0BVt0k9H"></div>
+      <canvas id="ui" width="480" height="272"></canvas>
+    </div>
+  </div>
+
+  <div id="hint" data-page-node-id="fAEwNw8cEkqimP3arg87qQ" aria-label="游戏操作说明">
+    <span><kbd>←</kbd><kbd>→</kbd>移动</span>
+    <span><kbd>Z</kbd>跳跃</span>
+    <span><kbd>X</kbd>冲刺</span>
+    <span class="rewind"><kbd>R</kbd>星辰回溯</span>
+    <span class="optional"><kbd>P</kbd>暂停</span>
+    <span class="optional"><kbd>F</kbd>全屏</span>
+    <span class="optional"><kbd>M</kbd>静音</span>
+  </div>
+
+  <div id="touch" data-page-node-id="9QV7BqjhSULp2Hq8IctqeN">
+    <div class="pad" data-page-node-id="voQua6q12KOND9nNMFE7F5">
+      <button data-k="left" aria-label="左" data-page-node-id="g52llezGyEwSoRPq1Lrnju">◀</button>
+      <button data-k="right" aria-label="右" data-page-node-id="MgMT5xydEwUqSD6eTqOL5C">▶</button>
+    </div>
+    <div class="pad" data-page-node-id="OSn6BvfJMaZBRAE5CHH3qn">
+      <button class="rw" data-k="rewind" aria-label="星辰回溯">◀◀</button>
+      <button data-k="run" aria-label="冲刺" data-page-node-id="ip2IFHCGLFZvy3Gv4Pa0B5">冲</button>
+      <button data-k="jump" aria-label="跳跃" data-page-node-id="a2kWLlCpGJ2UKr1Lr0elZf">跳</button>
+    </div>
+  </div>
+
+  <div id="rotate" data-page-node-id="isQJ2b3Wio4cwmIMSURRnT">
+    <div class="phone" data-page-node-id="gGIaSQ6XBvLfJnJD9kLDqi"></div>
+    <h2 data-page-node-id="6zBTDPpXUUiEWQ7U7MuotY">请把手机横过来</h2>
+    <p data-page-node-id="7LiuQq0VT9GGjmdM0WorEW">本作是横版闯关，需要横屏游玩<br data-page-node-id="0dWSM0fEeQwoMNfVmyZFgR">旋转后会自动继续</p>
+  </div>
+
+  <script src="js/core.js"></script>
+  <script src="js/levels.js"></script>
+  <!-- rewind.js 必须排在 entities.js 之前：entities.js 的碰撞代码要用 PG.rewind.solidAt -->
+  <script src="js/rewind.js"></script>
+  <script src="js/entities.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
