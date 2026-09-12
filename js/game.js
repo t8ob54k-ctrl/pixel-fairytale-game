@@ -374,7 +374,7 @@
     ctx.globalAlpha = 1;
 
     // 飘字
-    ctx.font = '9px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.font = '9px "Yuanti SC","YouYuan","圆体","PingFang SC",sans-serif';
     ctx.textAlign = 'center';
     for (var f = 0; f < G.floats.length; f++) {
       var fl = G.floats[f];
@@ -487,7 +487,7 @@
     var bossOn = !!bossRef;
 
     // 像素风HUD：白色字 + 黑色描边
-    ctx.font = 'bold 11px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.font = 'bold 11px "Yuanti SC","YouYuan","圆体","PingFang SC",sans-serif';
     ctx.textBaseline = 'top';
 
     // 绘制带黑描边的文字（马里奥经典风格）
@@ -571,12 +571,12 @@
 
     // 提示文字
     if (rw.active) {
-      ctx.font = '9px "Courier New", monospace';
+      ctx.font = '9px "Yuanti SC","YouYuan","圆体",sans-serif';
       ctx.fillStyle = '#7cf5ff';
       ctx.textAlign = 'left';
       ctx.fillText('◀◀ 倒流', 92, rwY - 5);
     } else if (rw.can()) {
-      ctx.font = '9px "Courier New", monospace';
+      ctx.font = '9px "Yuanti SC","YouYuan","圆体",sans-serif';
       ctx.fillStyle = (Math.floor(G.t * 2.5) % 2 === 0) ? '#7cf5ff' : '#4a9aaa';
       ctx.textAlign = 'left';
       ctx.fillText('R 回溯', 92, rwY - 5);
@@ -585,7 +585,7 @@
     // 中央提示（简洁横幅，白字黑描边）
     if (G.msg) {
       var my = bossOn ? 48 : 36;
-      ctx.font = 'bold 11px "Courier New", monospace';
+      ctx.font = 'bold 11px "Yuanti SC","YouYuan","圆体",sans-serif';
       ctx.textAlign = 'center';
       // 黑描边
       ctx.fillStyle = '#000';
@@ -627,7 +627,7 @@
 
       // 名牌
       ctx.fillStyle = '#fff';
-      ctx.font = '9px "PingFang SC","Microsoft YaHei",sans-serif';
+      ctx.font = '9px "Yuanti SC","YouYuan","圆体","PingFang SC",sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(b.name + (b.phase === 2 ? ' · 二阶段' : ''), VW / 2, by + 17);
       ctx.textAlign = 'left';
@@ -687,7 +687,7 @@
     ctx.textAlign = 'center';
 
     // 游戏标题（像素风大标题，暖金+深棕描边）
-    ctx.font = 'bold 28px "Courier New", monospace';
+    ctx.font = 'bold 28px "Yuanti SC","YouYuan","圆体",sans-serif';
     // 深棕描边
     ctx.fillStyle = '#5a3e2b';
     ctx.fillText('像素童话大陆', VW / 2 + 2, 72 + 2);
@@ -699,7 +699,7 @@
     ctx.fillText('像素童话大陆', VW / 2, 72);
 
     // 副标题
-    ctx.font = 'bold 12px "Courier New", monospace';
+    ctx.font = 'bold 12px "Yuanti SC","YouYuan","圆体",sans-serif';
     ctx.fillStyle = '#ff6b35';
     ctx.fillText('★ 小星冒险家 ★', VW / 2, 95);
 
@@ -709,14 +709,14 @@
 
     // 开始提示（闪烁，暖白色）
     var blink = Math.floor(G.t * 2) % 2;
-    ctx.font = 'bold 14px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.font = 'bold 14px "Yuanti SC","YouYuan","圆体","PingFang SC",sans-serif';
     if (blink) {
       ctx.fillStyle = '#fff';
       ctx.fillText('按 回车键 开始游戏', VW / 2, 180);
     }
 
     // 底部信息（深棕色）
-    ctx.font = '10px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.font = '10px "Yuanti SC","YouYuan","圆体","PingFang SC",sans-serif';
     ctx.fillStyle = 'rgba(90,62,43,0.8)';
     ctx.fillText('已解锁世界 ' + PG.save.load().unlocked + '/5   星辰碎片 ' + PG.save.load().stars + '/30', VW / 2, 250);
 
@@ -744,10 +744,10 @@
     ctx.textAlign = 'center';
 
     // 标题（暖棕色）
-    ctx.font = 'bold 18px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.font = 'bold 18px "Yuanti SC","YouYuan","圆体","PingFang SC",sans-serif';
     ctx.fillStyle = '#8b4513';
     ctx.fillText('选择世界', VW / 2, 28);
-    ctx.font = '11px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.font = '11px "Yuanti SC","YouYuan","圆体","PingFang SC",sans-serif';
     ctx.fillStyle = '#a67c52';
     ctx.fillText('← → 选择世界    ↑ ↓ 选择关卡    回车 开始', VW / 2, 46);
 
@@ -784,10 +784,10 @@
       }
 
       // 世界名称
-      ctx.font = 'bold 13px "PingFang SC","Microsoft YaHei",sans-serif';
+      ctx.font = 'bold 13px "Yuanti SC","YouYuan","圆体","PingFang SC",sans-serif';
       ctx.fillStyle = locked ? '#b8a080' : '#5a3e2b';
       ctx.fillText(th.name, x + cardW / 2, y + 18);
-      ctx.font = '10px "PingFang SC","Microsoft YaHei",sans-serif';
+      ctx.font = '10px "Yuanti SC","YouYuan","圆体","PingFang SC",sans-serif';
       ctx.fillStyle = locked ? '#c0a888' : '#8b5a2b';
       ctx.fillText(locked ? '🔒 未解锁' : '第 ' + (i+1) + ' 世界', x + cardW / 2, y + 34);
 
@@ -807,7 +807,7 @@
           ctx.strokeRect(x + 6, ly, cardW - 12, 22);
         }
 
-        ctx.font = '9px "Courier New", monospace';
+        ctx.font = '9px "Yuanti SC","YouYuan","圆体",sans-serif';
         ctx.fillStyle = lvLocked ? '#b8a080' : '#6b4423';
         ctx.textAlign = 'left';
         var label = l === 2 ? 'BOSS' : (i+1) + '-' + (l+1);
@@ -816,7 +816,7 @@
         // 星星
         if (!lvLocked && info.stars > 0) {
           ctx.textAlign = 'right';
-          ctx.font = '8px "Courier New", monospace';
+          ctx.font = '8px "Yuanti SC","YouYuan","圆体",sans-serif';
           ctx.fillStyle = '#ff9500';
           ctx.fillText('★'.repeat(info.stars), x + cardW - 10, ly + 15);
         }
@@ -825,7 +825,7 @@
     }
 
     // 底部说明
-    ctx.font = '9px "Courier New", monospace';
+    ctx.font = '9px "Yuanti SC","YouYuan","圆体",sans-serif';
     ctx.fillStyle = '#8b5a2b';
     var desc = [
       '草原世界 · 适合新手入门',
@@ -836,7 +836,7 @@
     ][G.selWorld];
     ctx.fillText(desc, VW / 2, 225);
     ctx.fillStyle = '#a67c52';
-    ctx.font = '10px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.font = '10px "Yuanti SC","YouYuan","圆体","PingFang SC",sans-serif';
     ctx.fillText('回车 出发    Esc 返回标题', VW / 2, 248);
 
     ctx.textAlign = 'left';
@@ -865,10 +865,10 @@
     roundRect(ctx, x, y, w, h, 8); ctx.stroke();
 
     ctx.textAlign = 'center';
-    ctx.font = 'bold 16px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.font = 'bold 16px "Yuanti SC","YouYuan","圆体","PingFang SC",sans-serif';
     ctx.fillStyle = accent || '#ffe066';
     ctx.fillText(title, VW / 2, y + 30);
-    ctx.font = '11px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.font = '11px "Yuanti SC","YouYuan","圆体","PingFang SC",sans-serif';
     ctx.fillStyle = '#e8e2ff';
     for (var i = 0; i < lines.length; i++) {
       ctx.fillStyle = lines[i].c || '#e8e2ff';
@@ -904,7 +904,7 @@
     var title = ci.isBonus ? '密室通关' : (ci.isBoss ? '世界通关 · ' + th.name : '关卡完成');
     renderOverlayPanel(title, lines, ci.isBoss ? '#ff8c42' : '#ffe066');
     ctx.textAlign = 'center';
-    ctx.font = '10px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.font = '10px "Yuanti SC","YouYuan","圆体","PingFang SC",sans-serif';
     ctx.fillStyle = Math.floor(G.t * 2) % 2 ? '#ffe066' : '#7a6fa8';
     ctx.fillText('按 Enter 继续', VW / 2, VH - 26);
     ctx.textAlign = 'left';
@@ -1035,10 +1035,10 @@
         // 背景与星星留在世界层（像素方块要锐利），文字走 UI 层
         var u = uctx;
         u.textAlign = 'center';
-        u.font = 'bold 22px "PingFang SC","Microsoft YaHei",sans-serif';
+        u.font = 'bold 22px "Yuanti SC","YouYuan","圆体","PingFang SC",sans-serif';
         u.fillStyle = '#ffe066';
         u.fillText('星辰重燃 · 大陆重光', VW / 2, 90);
-        u.font = '11px "PingFang SC","Microsoft YaHei",sans-serif';
+        u.font = '11px "Yuanti SC","YouYuan","圆体","PingFang SC",sans-serif';
         u.fillStyle = '#e8e2ff';
         var lines = [
           '暗影领主消散在光里，散落的星辰碎片重新聚成水晶。',
@@ -1051,7 +1051,7 @@
         ];
         lines.forEach(function (t, i) { u.fillText(t, VW / 2, 130 + i * 20); });
         u.fillStyle = Math.floor(G.t * 2) % 2 ? '#ffe066' : '#7a6fa8';
-        u.font = 'bold 11px "PingFang SC","Microsoft YaHei",sans-serif';
+        u.font = 'bold 11px "Yuanti SC","YouYuan","圆体","PingFang SC",sans-serif';
         u.fillText('按 Enter 回到标题', VW / 2, 260);
         u.textAlign = 'left';
         break;
