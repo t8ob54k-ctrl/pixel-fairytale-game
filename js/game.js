@@ -130,7 +130,7 @@
     G.deathPending = false;
     PG.rewind.reset();
     G.state = 'play';
-    PG.audio.startMusic(w);
+    PG.audio.startWorldMusic(w, l === 2);
   };
 
   G.respawn = function () {
@@ -163,6 +163,7 @@
     }
     G.clearInfo = { w: w, l: l, stars: G.stars, coins: G.coins, timeBonus: timeBonus, isBoss: l === 2, isBonus: !!G.lv.isBonus };
     PG.audio.sfx('clear');
+    PG.audio.startMusic('clear');
     G.state = 'clear';
   };
 
@@ -844,7 +845,7 @@
     if (IN.pressed('mute')) {
       PG.audio.on = !PG.audio.on;
       PG.audio.musicOn = PG.audio.on;
-      if (PG.audio.on && G.state === 'play') PG.audio.startMusic(G.world);
+      if (PG.audio.on && G.state === 'play') PG.audio.startWorldMusic(G.world, G.level === 2);
       else PG.audio.stopMusic();
       G.msg = PG.audio.on ? '音效开' : '音效关'; G.msgT = 1.2;
     }
@@ -876,7 +877,7 @@
             G.msg = '这个世界还没解锁，先通关前面的 BOSS 关'; G.msgT = 1.8;
           }
         }
-        if (IN.pressed('pause')) { G.state = 'title'; }
+        if (IN.pressed('pause')) { G.state = 'title'; PG.audio.startMusic('title'); }
         break;
       }
 
@@ -888,7 +889,7 @@
 
       case 'paused':
         if (IN.pressed('pause') || IN.pressed('confirm')) {
-          G.state = 'play'; PG.audio.startMusic(G.world);
+          G.state = 'play'; PG.audio.startWorldMusic(G.world, G.level === 2);
         }
         if (IN.pressed('left')) { G.lives = 5; G.loadLevel(G.world, G.level); }
         if (IN.pressed('right')) { G.state = 'map'; }
@@ -912,7 +913,7 @@
         break;
 
       case 'victory':
-        if (IN.pressed('confirm') || IN.pressed('jump')) { G.state = 'title'; }
+        if (IN.pressed('confirm') || IN.pressed('jump')) { G.state = 'title'; PG.audio.startMusic('title'); }
         break;
     }
   }
@@ -1067,6 +1068,7 @@
   /* 首次交互解锁音频 */
   window.addEventListener('pointerdown', function once() {
     PG.audio.resume();
+    if (G.state === 'title') PG.audio.startMusic('title');
     window.removeEventListener('pointerdown', once);
   });
 
