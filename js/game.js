@@ -1115,8 +1115,16 @@
 
   function fit() {
     var vw = window.innerWidth, vh = window.innerHeight;
-    // 全屏铺满：不留边距，按窗口等比缩放（cover方式，超出部分裁掉）
-    var s = Math.max(vw / VW, vh / VH);
+    var touch = isTouch();
+    // 完整显示不裁切（contain）：留少量安全边距，任何机子都不丢内容
+    // 移动端几乎铺满；桌面端留 24px 呼吸边距
+    var padX = touch ? 4 : 24;
+    var padY = touch ? 4 : 24;
+    var sw = Math.max(240, vw - padX * 2);
+    var sh = Math.max(160, vh - padY * 2);
+    var s = Math.min(sw / VW, sh / VH);
+    // 大屏取 0.5 整数倍保证像素锐利
+    if (s >= 2) s = Math.floor(s * 2) / 2;
     var cssW = Math.round(VW * s), cssH = Math.round(VH * s);
     canvas.style.width = cssW + 'px';
     canvas.style.height = cssH + 'px';
