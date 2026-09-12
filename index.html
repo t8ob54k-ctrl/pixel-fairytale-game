@@ -49,10 +49,11 @@
   #stage{
     position:relative;
     line-height:0;
-    border-radius:0;
+    border-radius:8px;
     overflow:hidden;
     isolation:isolate;
     background:#000;
+    box-shadow:0 0 0 2px #2a1f14, 0 12px 40px rgba(0,0,0,.5);
   }
   #stage::after{display:none;}
   /* 世界层：低分辨率 + 最近邻放大，保持像素锐利 */
