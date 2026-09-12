@@ -167,6 +167,75 @@
   }
   #rotate h2{margin:0;font-size:17px;color:#ffe066;letter-spacing:.05em;}
   #rotate p{margin:0;font-size:12px;color:#8d80b8;line-height:1.7;}
+
+  /* ---------- 打赏 / 支持作者 ---------- */
+  /* 入口小按钮：固定右上角，菜单态才显示（游戏进行中由 body.playing 隐藏） */
+  #donateBtn{
+    position:fixed;top:12px;right:14px;z-index:30;
+    display:none;align-items:center;gap:6px;
+    padding:8px 14px;border:2px solid #5a3e2b;border-radius:999px;
+    background:linear-gradient(145deg,#ffd9a0,#f0a860);
+    color:#5a3e2b;font-family:"Fusion Pixel",monospace;font-size:12px;font-weight:700;
+    box-shadow:0 3px 0 #5a3e2b,0 6px 14px rgba(0,0,0,.25);
+    cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;
+    user-select:none;-webkit-user-select:none;
+  }
+  #donateBtn .heart{color:#e8533f;font-size:14px;}
+  #donateBtn:active{transform:translateY(2px);box-shadow:0 1px 0 #5a3e2b;}
+  body.menu #donateBtn{display:inline-flex;}
+  body.playing #donateBtn{display:none;}
+  /* 横屏手机上按钮缩小一点，避免遮挡 */
+  @media (max-width:900px){
+    #donateBtn{top:8px;right:8px;padding:6px 10px;font-size:10px;}
+  }
+
+  /* 弹窗遮罩 */
+  #donateMask{
+    position:fixed;inset:0;z-index:80;display:none;
+    align-items:center;justify-content:center;padding:20px;
+    background:rgba(40,24,12,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+  }
+  #donateMask.show{display:flex;}
+  /* 弹窗主体 */
+  #donateModal{
+    position:relative;width:min(420px,92vw);max-height:90vh;overflow:auto;
+    background:#f5e6c8;border:3px solid #5a3e2b;border-radius:16px;
+    box-shadow:0 10px 0 #5a3e2b,0 20px 50px rgba(0,0,0,.4);
+    padding:20px 20px 22px;text-align:center;
+    font-family:"Fusion Pixel",monospace;color:#5a3e2b;
+  }
+  #donateModal h3{margin:0 0 4px;font-size:15px;letter-spacing:.05em;}
+  #donateModal .sub{margin:0 0 16px;font-size:10px;color:#8b5a2b;line-height:1.7;}
+  #donateClose{
+    position:absolute;top:8px;right:10px;width:28px;height:28px;
+    border:2px solid #5a3e2b;border-radius:50%;background:#e8632a;color:#fff;
+    font-size:14px;font-weight:700;line-height:1;cursor:pointer;padding:0;
+    -webkit-tap-highlight-color:transparent;
+  }
+  #donateClose:active{transform:scale(.92);}
+  .qr-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+  .qr-card{
+    width:168px;background:#fffdf6;border:2px solid #c9a86a;border-radius:12px;
+    padding:10px 10px 12px;
+  }
+  .qr-card .tag{
+    display:inline-block;margin-bottom:8px;padding:3px 10px;border-radius:999px;
+    font-size:10px;font-weight:700;color:#fff;
+  }
+  .qr-card.wechat .tag{background:#2faa46;}
+  .qr-card.alipay .tag{background:#1677ff;}
+  .qr-box{
+    width:140px;height:140px;margin:0 auto;border-radius:8px;overflow:hidden;
+    background:#f0e6cf;display:flex;align-items:center;justify-content:center;
+  }
+  .qr-box img{width:100%;height:100%;object-fit:contain;display:block;-webkit-touch-callout:default;}
+  .qr-placeholder{
+    width:100%;height:100%;display:flex;flex-direction:column;gap:6px;
+    align-items:center;justify-content:center;color:#a98c5a;font-size:10px;line-height:1.6;
+    border:2px dashed #c9a86a;border-radius:8px;text-align:center;padding:8px;
+  }
+  .qr-tip{margin-top:8px;font-size:9px;color:#a07a48;}
+  #donateModal .thanks{margin:14px 0 0;font-size:10px;color:#b85c29;}
 </style>
 </head>
 <body data-page-node-id="F60L1c9Za8AtzcYd019mmq">
@@ -206,11 +275,80 @@
     <p data-page-node-id="7LiuQq0VT9GGjmdM0WorEW">本作是横版闯关，需要横屏游玩<br data-page-node-id="0dWSM0fEeQwoMNfVmyZFgR">旋转后会自动继续</p>
   </div>
 
+  <!-- 打赏入口（菜单态显示） -->
+  <button id="donateBtn" aria-label="支持作者"><span class="heart">♥</span>支持作者</button>
+
+  <!-- 打赏弹窗：放微信/支付宝收款码，手机可长按识别 -->
+  <div id="donateMask" aria-hidden="true">
+    <div id="donateModal" role="dialog" aria-label="支持作者">
+      <button id="donateClose" aria-label="关闭">✕</button>
+      <h3>♥ 请作者喝杯奶茶 ♥</h3>
+      <p class="sub">如果《像素童话大陆》给你带来了快乐，<br>可以自愿打赏支持一下，金额随意～</p>
+      <div class="qr-row">
+        <div class="qr-card wechat">
+          <span class="tag">微信收款</span>
+          <div class="qr-box">
+            <!-- 替换 src 为你的微信收款码图片，例如 assets/wechat.png -->
+            <img id="wechatQR" alt="微信收款码" style="display:none;">
+            <div class="qr-placeholder" id="wechatPH">微信收款码<br>待添加</div>
+          </div>
+          <div class="qr-tip">长按图片识别支付</div>
+        </div>
+        <div class="qr-card alipay">
+          <span class="tag">支付宝收款</span>
+          <div class="qr-box">
+            <!-- 替换 src 为你的支付宝收款码图片，例如 assets/alipay.png -->
+            <img id="alipayQR" alt="支付宝收款码" style="display:none;">
+            <div class="qr-placeholder" id="alipayPH">支付宝收款码<br>待添加</div>
+          </div>
+          <div class="qr-tip">长按图片识别支付</div>
+        </div>
+      </div>
+      <p class="thanks">★ 你的支持是我更新下去的最大动力 ★</p>
+    </div>
+  </div>
+
   <script src="js/core.js"></script>
   <script src="js/levels.js"></script>
   <!-- rewind.js 必须排在 entities.js 之前：entities.js 的碰撞代码要用 PG.rewind.solidAt -->
   <script src="js/rewind.js"></script>
   <script src="js/entities.js"></script>
   <script src="js/game.js"></script>
+  <script>
+  /* 打赏弹窗开关（独立于游戏逻辑） */
+  (function () {
+    var mask = document.getElementById('donateMask');
+    var btn  = document.getElementById('donateBtn');
+    var close= document.getElementById('donateClose');
+    function open() {
+      mask.classList.add('show');
+      mask.setAttribute('aria-hidden', 'false');
+      if (window.PG && PG.audio) { try { PG.audio.unlock(); PG.audio.sfx('select'); } catch (e) {} }
+    }
+    function hide() {
+      mask.classList.remove('show');
+      mask.setAttribute('aria-hidden', 'true');
+    }
+    btn.addEventListener('click', open);
+    btn.addEventListener('touchend', function (e) { e.preventDefault(); open(); }, { passive: false });
+    close.addEventListener('click', hide);
+    // 点遮罩空白处关闭（点弹窗本身不关）
+    mask.addEventListener('click', function (e) { if (e.target === mask) hide(); });
+    // Esc 关闭
+    window.addEventListener('keydown', function (e) {
+      if (e.code === 'Escape' || e.code === 'KeyP') hide();
+    });
+    // 预留：如果以后放入收款码文件，给 img 设 src 后会自动显示并隐藏占位
+    window.setDonateQR = function (type, src) {
+      var img = document.getElementById(type + 'QR');
+      var ph  = document.getElementById(type + 'PH');
+      if (!img) return;
+      img.src = src; img.style.display = 'block';
+      if (ph) ph.style.display = 'none';
+    };
+    // 网址带 #donate 时自动弹出（可直接把带 #donate 的链接发给玩家）
+    if (location.hash === '#donate') open();
+  })();
+  </script>
 </body>
 </html>
