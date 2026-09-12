@@ -164,31 +164,84 @@ window.PG = window.PG || {};
                        }); break;
       }
     },
-    /* 极简芯片音乐：每个世界一条 8 音循环 */
-    MUSIC: [
-      [392,523,659,523,440,587,698,587],   // 草原 · 明快
-      [349,440,523,466,349,523,587,466],   // 森林 · 幽深
-      [330,415,494,415,370,466,554,466],   // 沙漠 · 燥热
-      [523,587,659,587,494,554,659,784],   // 冰川 · 清冷
-      [220,262,247,196,220,175,196,165]    // 城堡 · 压迫
-    ],
-    startMusic: function (worldIndex) {
+    /* 增强版芯片音乐：多场景 × 16音循环 + 低音线 */
+    MUSIC_SCENES: {
+      title: {
+        notes: [523, 659, 784, 659, 587, 698, 880, 698, 523, 659, 784, 1047, 880, 784, 659, 523],
+        bass:  [131, 131, 165, 165, 147, 147, 196, 196, 131, 131, 165, 165, 147, 147, 98, 98],
+        wave: 'square', bassWave: 'triangle', tempo: 200, vol: 0.032
+      },
+      world0: {
+        notes: [392, 523, 659, 523, 440, 587, 698, 587, 392, 523, 659, 784, 698, 587, 440, 523],
+        bass:  [98, 98, 110, 110, 87, 87, 98, 98, 98, 98, 110, 110, 87, 87, 73, 73],
+        wave: 'triangle', bassWave: 'square', tempo: 235, vol: 0.038
+      },
+      world1: {
+        notes: [349, 440, 523, 466, 349, 523, 587, 466, 392, 494, 587, 523, 392, 523, 659, 587],
+        bass:  [87, 87, 110, 110, 98, 98, 87, 87, 98, 98, 123, 123, 110, 110, 98, 98],
+        wave: 'triangle', bassWave: 'square', tempo: 250, vol: 0.036
+      },
+      world2: {
+        notes: [330, 415, 494, 415, 370, 466, 554, 466, 330, 415, 494, 622, 554, 466, 370, 415],
+        bass:  [83, 83, 98, 98, 92, 92, 83, 83, 83, 83, 98, 98, 104, 104, 92, 92],
+        wave: 'sawtooth', bassWave: 'square', tempo: 220, vol: 0.034
+      },
+      world3: {
+        notes: [523, 587, 659, 587, 494, 554, 659, 784, 523, 587, 698, 659, 587, 523, 494, 440],
+        bass:  [131, 131, 147, 147, 123, 123, 131, 131, 131, 131, 165, 165, 147, 147, 123, 123],
+        wave: 'triangle', bassWave: 'sine', tempo: 210, vol: 0.033
+      },
+      world4: {
+        notes: [220, 262, 247, 196, 220, 175, 196, 165, 220, 294, 330, 294, 262, 247, 220, 196],
+        bass:  [55, 55, 49, 49, 55, 55, 41, 41, 55, 55, 65, 65, 49, 49, 41, 41],
+        wave: 'sawtooth', bassWave: 'square', tempo: 260, vol: 0.042
+      },
+      boss: {
+        notes: [110, 110, 110, 110, 116, 116, 110, 110, 98, 98, 98, 98, 104, 104, 110, 110],
+        bass:  [55, 55, 55, 55, 58, 58, 55, 55, 49, 49, 49, 49, 52, 52, 55, 55],
+        wave: 'sawtooth', bassWave: 'square', tempo: 180, vol: 0.045
+      },
+      clear: {
+        notes: [523, 659, 784, 1047, 784, 659, 523, 659, 784, 1047, 1319, 1047, 784, 659, 523, 523],
+        bass:  [131, 131, 165, 165, 131, 131, 98, 98, 131, 131, 165, 165, 131, 131, 98, 98],
+        wave: 'square', bassWave: 'triangle', tempo: 170, vol: 0.040
+      }
+    },
+    _currentScene: null,
+    startMusic: function (sceneOrWorld) {
       if (!this.musicOn) return;
       this.stopMusic();
+      var scene;
+      if (typeof sceneOrWorld === 'string') {
+        scene = sceneOrWorld;
+      } else {
+        scene = 'world' + (sceneOrWorld || 0);
+      }
+      if (!this.MUSIC_SCENES[scene]) scene = 'world0';
+      this._currentScene = scene;
       var self = this;
-      this._world = worldIndex || 0;
+      var cfg = this.MUSIC_SCENES[scene];
       this._step = 0;
       this._musicTimer = setInterval(function () {
         if (!self.musicOn) return;
-        var pat = self.MUSIC[self._world % self.MUSIC.length];
-        var n = pat[self._step % pat.length];
-        self.tone(n, 0.16, self._world === 4 ? 'sawtooth' : 'triangle', 0.035);
-        if (self._step % 4 === 0) self.tone(n / 4, 0.30, 'square', 0.030);
+        var i = self._step % cfg.notes.length;
+        var n = cfg.notes[i];
+        var b = cfg.bass[i];
+        self.tone(n, cfg.tempo / 1000 * 0.85, cfg.wave, cfg.vol);
+        if (i % 2 === 0) self.tone(b, cfg.tempo / 1000 * 1.6, cfg.bassWave, cfg.vol * 0.7);
+        // 每4小节加一个装饰音
+        if (self._step % 8 === 4) self.tone(n * 2, 0.08, 'sine', cfg.vol * 0.5);
         self._step++;
-      }, 235);
+      }, cfg.tempo);
     },
     stopMusic: function () {
       if (this._musicTimer) { clearInterval(this._musicTimer); this._musicTimer = null; }
+      this._currentScene = null;
+    },
+    // 兼容旧调用：按世界编号开始音乐
+    startWorldMusic: function (worldIndex, isBoss) {
+      if (isBoss) this.startMusic('boss');
+      else this.startMusic('world' + worldIndex);
     }
   };
 
