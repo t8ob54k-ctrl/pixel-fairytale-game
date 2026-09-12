@@ -693,27 +693,27 @@
         }
         break;
 
-      /* ---- 3 寒冰巨熊 ---- */
+      /* ---- 3 寒冰巨熊（已削弱） ---- */
       case 3:
         if (b.state === 'idle' || b.state === 'walk') {
           b.state = 'walk';
-          b.vx = PG.clamp(dx, -1, 1) * 44 * speed;
-          if (b.st <= 0) { b.state = Math.random() < 0.55 ? 'spikes' : 'charge'; b.st = 0.45; }
+          b.vx = PG.clamp(dx, -1, 1) * 38 * speed;
+          if (b.st <= 0) { b.state = Math.random() < 0.5 ? 'spikes' : 'charge'; b.st = 0.5; }
         } else if (b.state === 'spikes') {
           b.vx = 0;
           if (b.st <= 0) {
             var baseX = p.x;
-            for (var k = 0; k < 4; k++) {
+            for (var k = 0; k < 3; k++) {
               G.ents.push({
-                type: 'eproj', x: baseX - 30 + k * 22, y: 12 * TILE, w: 8, h: 12,
-                vx: 0, vy: -300, grav: 700, life: 2.2, color: '#7ce8ff', passWall: true
+                type: 'eproj', x: baseX - 22 + k * 22, y: 12 * TILE, w: 8, h: 12,
+                vx: 0, vy: -240, grav: 650, life: 2.0, color: '#7ce8ff', passWall: true
               });
             }
-            PG.audio.sfx('chill'); b.state = 'walk'; b.st = 1.6;
+            PG.audio.sfx('chill'); b.state = 'walk'; b.st = 2.2;
           }
         } else if (b.state === 'charge') {
-          b.vx = PG.sign(dx) * 250;
-          if (b.st <= 0) { b.state = 'walk'; b.st = 1.2; }
+          b.vx = PG.sign(dx) * 180;
+          if (b.st <= 0) { b.state = 'walk'; b.st = 1.6; }
         }
         break;
 
