@@ -11,6 +11,16 @@
   var ctx = canvas.getContext('2d');
   ctx.imageSmoothingEnabled = false;
 
+  /* ---------------- Kenney Pixel Adventure UI 素材 ---------------- */
+  var UI_SHEET = new Image();
+  UI_SHEET.src = 'data:image/png;base64,' + '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';
+  // 从tilesheet裁剪一个tile并绘制（每个tile 32x32，间距1px）
+  function drawUITile(tileX, tileY, dx, dy, dw, dh) {
+    if (!UI_SHEET.complete || !UI_SHEET.naturalWidth) return false;
+    uctx.drawImage(UI_SHEET, tileX * 33, tileY * 33, 32, 32, dx, dy, dw, dh);
+    return true;
+  }
+
   /* ---------------- UI 层（原生分辨率） ----------------
      世界层只有 480×272，铺到屏幕上要放大 2~3 倍，矢量字体在那个
      尺度上被放大就糊了。所以另开一块 #ui 画布：
@@ -686,18 +696,17 @@
 
     ctx.textAlign = 'center';
 
-    // 标题背景面板（Kenney像素风奶油面板）
+    // 真实Kenney素材：米色边框面板（tile 5,0）
     var titleW = 280, titleH = 56;
     var titleX = VW / 2 - titleW / 2, titleY = 40;
-    // 深棕外框
-    ctx.fillStyle = '#5a3e2b';
-    ctx.fillRect(titleX, titleY, titleW, titleH);
-    // 奶油色面板
-    ctx.fillStyle = '#f5e6c8';
-    ctx.fillRect(titleX + 3, titleY + 3, titleW - 6, titleH - 6);
-    // 顶部高光
-    ctx.fillStyle = '#fff0d6';
-    ctx.fillRect(titleX + 3, titleY + 3, titleW - 6, 6);
+    var titleDrew = drawUITile(5, 0, titleX, titleY, titleW, titleH);
+    if (!titleDrew) {
+      // 回退：代码绘制
+      ctx.fillStyle = '#5a3e2b';
+      ctx.fillRect(titleX, titleY, titleW, titleH);
+      ctx.fillStyle = '#f5e6c8';
+      ctx.fillRect(titleX + 3, titleY + 3, titleW - 6, titleH - 6);
+    }
 
     // 游戏标题（像素风，适配像素字体尺寸）
     ctx.font = '16px "Fusion Pixel",monospace';
@@ -718,15 +727,15 @@
     var btnW = 180, btnH = 30;
     var btnX = VW / 2 - btnW / 2, btnY = 165;
     if (blink) {
-      // 深棕边框
-      ctx.fillStyle = '#5a3e2b';
-      ctx.fillRect(btnX, btnY, btnW, btnH);
-      // 橙色按钮面
-      ctx.fillStyle = '#ff8c42';
-      ctx.fillRect(btnX + 3, btnY + 3, btnW - 6, btnH - 6);
-      // 高光
-      ctx.fillStyle = '#ffb380';
-      ctx.fillRect(btnX + 3, btnY + 3, btnW - 6, 5);
+      // 真实Kenney素材：红色矩形按钮（tile 4,2）
+      var startDrew = drawUITile(4, 2, btnX, btnY, btnW, btnH);
+      if (!startDrew) {
+        // 回退：代码绘制
+        ctx.fillStyle = '#5a3e2b';
+        ctx.fillRect(btnX, btnY, btnW, btnH);
+        ctx.fillStyle = '#ff8c42';
+        ctx.fillRect(btnX + 3, btnY + 3, btnW - 6, btnH - 6);
+      }
       // 文字
       ctx.font = '11px "Fusion Pixel",monospace';
       ctx.fillStyle = '#fff';
@@ -782,19 +791,20 @@
       var locked = (i + 1) > d.unlocked;
       var sel = i === G.selWorld;
 
-      // 像素风奶油色面板（Kenney Pixel Adventure风格）
-      // 外层深棕边框
-      ctx.fillStyle = '#5a3e2b';
-      ctx.fillRect(x, y, cardW, cardH);
-      // 内层奶油色背景
-      ctx.fillStyle = locked ? '#d4c4a8' : '#f5e6c8';
-      ctx.fillRect(x + 3, y + 3, cardW - 6, cardH - 6);
-      // 选中时加橙色高亮边框
-      if (sel) {
-        ctx.fillStyle = '#ff6b35';
-        ctx.fillRect(x - 2, y - 2, cardW + 4, cardH + 4);
+      // 真实Kenney素材：米色边框面板（tile 5,0），未加载成功时回退到代码绘制
+      var drew = drawUITile(locked ? 6 : 5, 0, x, y, cardW, cardH);
+      if (!drew) {
+        // 回退：代码绘制奶油色面板
+        ctx.fillStyle = '#5a3e2b';
+        ctx.fillRect(x, y, cardW, cardH);
         ctx.fillStyle = locked ? '#d4c4a8' : '#f5e6c8';
         ctx.fillRect(x + 3, y + 3, cardW - 6, cardH - 6);
+      }
+      // 选中时加橙色高亮边框
+      if (sel) {
+        ctx.strokeStyle = '#ff6b35';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(x - 2, y - 2, cardW + 4, cardH + 4);
       }
 
       // 世界预览色块（顶部）
@@ -827,17 +837,16 @@
         var lvLocked = locked;
         var isSel = sel && l === G.selLevel;
 
-        // 选中关卡按钮（Kenney风格像素按钮）
+        // 真实Kenney素材：红色矩形按钮（tile 4,2）
         if (isSel) {
-          // 深棕边框
-          ctx.fillStyle = '#5a3e2b';
-          ctx.fillRect(x + 6, ly, cardW - 12, 22);
-          // 橙色按钮面
-          ctx.fillStyle = '#ff8c42';
-          ctx.fillRect(x + 8, ly + 2, cardW - 16, 18);
-          // 高光
-          ctx.fillStyle = '#ffb380';
-          ctx.fillRect(x + 8, ly + 2, cardW - 16, 4);
+          var btnDrew = drawUITile(4, 2, x + 6, ly, cardW - 12, 22);
+          if (!btnDrew) {
+            // 回退：代码绘制
+            ctx.fillStyle = '#5a3e2b';
+            ctx.fillRect(x + 6, ly, cardW - 12, 22);
+            ctx.fillStyle = '#ff8c42';
+            ctx.fillRect(x + 8, ly + 2, cardW - 16, 18);
+          }
         }
 
         ctx.font = '9px "Fusion Pixel",monospace';
