@@ -1025,11 +1025,19 @@
   }
 
   /* ---------------- 渲染分发 ---------------- */
+  var _lastMenuClass = null;
   function render() {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, VW, VH);
     // UI 层每帧重画。这里不能重置它的 transform —— 缩放比例就存在那儿
     if (uctx !== ctx) uctx.clearRect(0, 0, VW, VH);
+    // 打赏按钮：闯关/暂停时隐藏，其余菜单界面显示（状态变化时才改 DOM）
+    var inPlay = (G.state === 'play' || G.state === 'paused');
+    if (inPlay !== _lastMenuClass) {
+      _lastMenuClass = inPlay;
+      document.body.classList.toggle('playing', inPlay);
+      document.body.classList.toggle('menu', !inPlay);
+    }
     switch (G.state) {
       case 'title': renderTitle(); break;
       case 'map': renderMap(); break;
