@@ -961,7 +961,7 @@
     switch (G.state) {
       case 'title':
         if (IN.pressed('confirm') || IN.pressed('jump')) {
-          PG.audio.resume(); PG.audio.sfx('select');
+          PG.audio.unlock(); PG.audio.sfx('select');
           goLandscape();                       // 借用这次手势请求横屏全屏
           G.selWorld = 0; G.selLevel = 0;
           G.state = 'map';
@@ -977,7 +977,7 @@
           var d = PG.save.load();
           if (G.selWorld + 1 <= d.unlocked) {
             G.lives = 5; G.score = 0; G.coins = 0; G.starTaken = {};
-            PG.audio.resume();
+            PG.audio.unlock();
             G.loadLevel(G.selWorld, G.selLevel);
           } else {
             G.msg = '这个世界还没解锁，先通关前面的 BOSS 关'; G.msgT = 1.8;
@@ -1172,16 +1172,31 @@
   }
   checkOrient();
 
-  /* 首次交互解锁音频（兼容移动端：pointerdown 在 touchstart preventDefault 后可能不触发，
-     所以 touchstart / pointerdown / mousedown 都监听；音频真正 running 前持续尝试） */
+  /* iOS/安卓音频解锁：必须在用户手势的同步调用栈里 unlock（播放静音buffer激活硬件），
+     用 capture 在 document 最早阶段捕获，保证虚拟按键 preventDefault 也拦不住。
+     音频真正 running 前每次手势都尝试，running 后启动标题音乐。 */
   function unlockAudio() {
-    PG.audio.resume();
-    var c = PG.audio.ctx;
-    if (c && c.state === 'running' && G.state === 'title') PG.audio.startMusic('title');
+    var A = PG.audio;
+    A.unlock();                       // 同步栈里激活（关键）
+    var c = A.ctx;
+    if (!c) return;
+    var startTitle = function () {
+      if (c.state === 'running' && G.state === 'title' && !A._musicTimer) {
+        A.startMusic('title');
+      }
+    };
+    startTitle();
+    // resume 是异步的，Promise 成功后再补一次启动音乐
+    if (c.state !== 'running' && c.resume) {
+      var p = c.resume();
+      if (p && p.then) p.then(startTitle).catch(function () {});
+    }
   }
-  window.addEventListener('touchstart', unlockAudio, { passive: true });
-  window.addEventListener('pointerdown', unlockAudio);
-  window.addEventListener('mousedown', unlockAudio);
+  // capture=true 保证最先收到；touchstart 用非 passive 也没关系，这里不 preventDefault
+  document.addEventListener('touchstart', unlockAudio, { capture: true, passive: true });
+  document.addEventListener('touchend',   unlockAudio, { capture: true, passive: true });
+  document.addEventListener('pointerdown', unlockAudio, true);
+  document.addEventListener('mousedown',  unlockAudio, true);
 
   /* 清空存档 */
   window.addEventListener('keydown', function (e) {
