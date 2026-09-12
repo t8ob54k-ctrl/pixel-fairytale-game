@@ -77,7 +77,13 @@ window.PG = window.PG || {};
   PG.bindTouch = function (root) {
     Array.prototype.forEach.call(root.querySelectorAll('button[data-k]'), function (btn) {
       var a = btn.getAttribute('data-k');
-      var on  = function (e) { e.preventDefault(); setKey(a, true);  btn.classList.add('on'); };
+      var on  = function (e) {
+        e.preventDefault();
+        // 关键：在用户触摸的直接调用栈里解锁音频（iOS必须这样才有声）
+        if (PG.audio) PG.audio.resume();
+        setKey(a, true);
+        btn.classList.add('on');
+      };
       var off = function (e) { e.preventDefault(); setKey(a, false); btn.classList.remove('on'); };
       btn.addEventListener('touchstart', on,  { passive: false });
       btn.addEventListener('touchend', off,   { passive: false });
@@ -107,7 +113,17 @@ window.PG = window.PG || {};
     },
     resume: function () {
       var c = this.ensure();
-      if (c && c.state === 'suspended') c.resume();
+      if (!c) return;
+      // iOS/安卓都要求在用户手势里 resume；这里兼容 suspended/中断 两种情况
+      if (c.state === 'suspended' || c.state === 'interrupted') {
+        var p = c.resume();
+        // 某些机型第一次 resume 会被拒，Promise 回来后若仍挂起再试一次
+        if (p && p.catch) {
+          p.catch(function () {}).then(function () {
+            if (c.state === 'suspended') { try { c.resume(); } catch (e) {} }
+          });
+        }
+      }
     },
     tone: function (freq, dur, type, vol, slideTo) {
       if (!this.on) return;
