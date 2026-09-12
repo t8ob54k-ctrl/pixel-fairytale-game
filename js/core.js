@@ -73,25 +73,102 @@ window.PG = window.PG || {};
   window.addEventListener('blur', function () {
     for (var k in held) held[k] = false;
   });
-  // 触摸/鼠标虚拟键
+  // 触摸虚拟键（多点触控：每根手指独立追踪，支持“左手方向+右手跳跃”同时按、
+  // 手指滑出自动释放、滑入自动按下、任何情况都不卡键）
   PG.bindTouch = function (root) {
-    Array.prototype.forEach.call(root.querySelectorAll('button[data-k]'), function (btn) {
-      var a = btn.getAttribute('data-k');
-      var on  = function (e) {
+    var buttons = Array.prototype.slice.call(root.querySelectorAll('button[data-k]'));
+    var active = {}; // touch.identifier -> 当前按住的按钮
+
+    function buttonFromPoint(x, y) {
+      var el = document.elementFromPoint(x, y);
+      while (el && el !== document.body) {
+        if (el.tagName === 'BUTTON' && el.hasAttribute && el.hasAttribute('data-k')) return el;
+        el = el.parentNode;
+      }
+      return null;
+    }
+    function press(btn) {
+      if (!btn) return;
+      if (PG.audio) PG.audio.unlock();      // 手势同步栈激活音频
+      setKey(btn.getAttribute('data-k'), true);
+      btn.classList.add('on');
+    }
+    function release(btn) {
+      if (!btn) return;
+      setKey(btn.getAttribute('data-k'), false);
+      btn.classList.remove('on');
+    }
+    function eachTouch(list, fn) {
+      for (var i = 0; i < list.length; i++) fn(list[i]);
+    }
+
+    // 所有触摸事件统一在 document 捕获，规避 iOS 的 target 锁定/冒泡差异；
+    // 只处理“命中虚拟按钮”或“我们已记录”的触摸点。
+    // touchstart：找出这根手指落在哪个按钮上
+    document.addEventListener('touchstart', function (e) {
+      eachTouch(e.changedTouches, function (t) {
+        var btn = buttonFromPoint(t.clientX, t.clientY);
+        if (btn) {
+          e.preventDefault();
+          active[t.identifier] = btn; press(btn);
+        }
+      });
+    }, { passive: false, capture: true });
+
+    // touchmove：手指滑出旧键就释放、滑到新键就按下（跟手，像真实手柄）
+    document.addEventListener('touchmove', function (e) {
+      var handled = false;
+      eachTouch(e.changedTouches, function (t) {
+        if (!(t.identifier in active)) return;
+        handled = true;
+        var prev = active[t.identifier];
+        var cur = buttonFromPoint(t.clientX, t.clientY);
+        if (cur !== prev) {
+          if (prev) release(prev);
+          active[t.identifier] = cur || null;
+          if (cur) press(cur);
+        }
+      });
+      if (handled) e.preventDefault();
+    }, { passive: false, capture: true });
+
+    // touchend / touchcancel：这根手指抬起，只释放它自己按的键
+    function endTouch(e) {
+      eachTouch(e.changedTouches, function (t) {
+        if (!(t.identifier in active)) return;
         e.preventDefault();
-        // 关键：在用户触摸的同步调用栈里激活音频（iOS必须播放声音才能解锁）
-        if (PG.audio) PG.audio.unlock();
-        setKey(a, true);
-        btn.classList.add('on');
-      };
-      var off = function (e) { e.preventDefault(); setKey(a, false); btn.classList.remove('on'); };
-      btn.addEventListener('touchstart', on,  { passive: false });
-      btn.addEventListener('touchend', off,   { passive: false });
-      btn.addEventListener('touchcancel', off,{ passive: false });
-      btn.addEventListener('mousedown', on);
-      btn.addEventListener('mouseup', off);
-      btn.addEventListener('mouseleave', off);
+        var btn = active[t.identifier];
+        if (btn) release(btn);
+        delete active[t.identifier];
+      });
+    }
+    document.addEventListener('touchend', endTouch, { passive: false, capture: true });
+    document.addEventListener('touchcancel', endTouch, { passive: false, capture: true });
+
+    // 鼠标（桌面端测试用）
+    buttons.forEach(function (btn) {
+      var a = btn.getAttribute('data-k');
+      var dn = function (e) { e.preventDefault(); if (PG.audio) PG.audio.unlock(); setKey(a, true); btn.classList.add('on'); };
+      var up = function (e) { e.preventDefault(); setKey(a, false); btn.classList.remove('on'); };
+      btn.addEventListener('mousedown', dn);
+      btn.addEventListener('mouseup', up);
+      btn.addEventListener('mouseleave', up);
+      // 阻止 iOS 长按弹出系统菜单 / 双击放大
+      btn.addEventListener('contextmenu', function (e) { e.preventDefault(); });
     });
+
+    // 兜底：触摸全部离开、页面切后台、来电中断时，清空所有虚拟键，杜绝卡键
+    function clearAll() {
+      for (var id in active) { release(active[id]); delete active[id]; }
+    }
+    document.addEventListener('touchcancel', clearAll);
+    window.addEventListener('blur', clearAll);
+    window.addEventListener('pagehide', clearAll);
+    // 阻止双指缩放/手势干扰多点触控
+    ['gesturestart', 'gesturechange'].forEach(function (ev) {
+      document.addEventListener(ev, function (e) { e.preventDefault(); });
+    });
+
     document.body.classList.add('touch');
   };
 
