@@ -487,7 +487,7 @@
     var bossOn = !!bossRef;
 
     // 像素风HUD：白色字 + 黑色描边
-    ctx.font = 'bold 10px "Press Start 2P", "Courier New", monospace';
+    ctx.font = 'bold 11px "PingFang SC","Microsoft YaHei",sans-serif';
     ctx.textBaseline = 'top';
 
     // 绘制带黑描边的文字（马里奥经典风格）
@@ -505,8 +505,8 @@
     // ===== 顶部通栏 HUD（FC马里奥经典布局）=====
     var hudY = 6;
 
-    // 左：SCORE
-    drawPixelText('SCORE', 30, hudY, 'left', '#fff');
+    // 左：分数
+    drawPixelText('分数', 30, hudY, 'left', '#fff');
     var scoreStr = String(G.score).padStart(6, '0');
     drawPixelText(scoreStr, 30, hudY + 12, 'left', '#fff');
 
@@ -517,17 +517,17 @@
     ctx.beginPath(); ctx.arc(130, hudY + 16, 3, 0, Math.PI*2); ctx.fill();
     drawPixelText('×' + String(G.coins).padStart(2, '0'), 140, hudY + 12, 'left', '#fff');
 
-    // 中：WORLD
-    var worldLabel = lv.isBonus ? 'BONUS' : 'WORLD ' + (lv.world + 1) + '-' + (lv.index + 1);
+    // 中：关卡
+    var worldLabel = lv.isBonus ? '隐藏关' : '第' + (lv.world + 1) + '-' + (lv.index + 1) + '关';
     drawPixelText(worldLabel, VW / 2, hudY, 'center', '#fff');
 
     // 中右：生命
     drawPixelText('×' + Math.max(0, G.lives), VW / 2 + 70, hudY + 12, 'left', '#fff');
 
-    // 右：TIME
+    // 右：时间
     var t = Math.ceil(G.time);
     var timeColor = t < 30 ? (Math.floor(G.t * 6) % 2 ? '#ff0000' : '#fff') : '#fff';
-    drawPixelText('TIME', VW - 60, hudY, 'right', '#fff');
+    drawPixelText('时间', VW - 60, hudY, 'right', '#fff');
     drawPixelText(String(t).padStart(3, '0'), VW - 60, hudY + 12, 'right', timeColor);
 
     // ===== 状态图标（左上角，HUD下方）=====
@@ -709,16 +709,16 @@
 
     // 开始提示（闪烁，暖白色）
     var blink = Math.floor(G.t * 2) % 2;
-    ctx.font = 'bold 11px "Courier New", monospace';
+    ctx.font = 'bold 14px "PingFang SC","Microsoft YaHei",sans-serif';
     if (blink) {
       ctx.fillStyle = '#fff';
-      ctx.fillText('PRESS ENTER TO START', VW / 2, 180);
+      ctx.fillText('按 回车键 开始游戏', VW / 2, 180);
     }
 
     // 底部信息（深棕色）
-    ctx.font = '9px "Courier New", monospace';
+    ctx.font = '10px "PingFang SC","Microsoft YaHei",sans-serif';
     ctx.fillStyle = 'rgba(90,62,43,0.8)';
-    ctx.fillText('WORLDS: ' + PG.save.load().unlocked + '/5   STARS: ' + PG.save.load().stars + '/30', VW / 2, 250);
+    ctx.fillText('已解锁世界 ' + PG.save.load().unlocked + '/5   星辰碎片 ' + PG.save.load().stars + '/30', VW / 2, 250);
 
     ctx.textAlign = 'left';
   }
@@ -744,12 +744,12 @@
     ctx.textAlign = 'center';
 
     // 标题（暖棕色）
-    ctx.font = 'bold 16px "Courier New", monospace';
+    ctx.font = 'bold 18px "PingFang SC","Microsoft YaHei",sans-serif';
     ctx.fillStyle = '#8b4513';
-    ctx.fillText('SELECT WORLD', VW / 2, 28);
-    ctx.font = '9px "Courier New", monospace';
+    ctx.fillText('选择世界', VW / 2, 28);
+    ctx.font = '11px "PingFang SC","Microsoft YaHei",sans-serif';
     ctx.fillStyle = '#a67c52';
-    ctx.fillText('← → 选择世界    ↑ ↓ 选择关卡    ENTER 开始', VW / 2, 44);
+    ctx.fillText('← → 选择世界    ↑ ↓ 选择关卡    回车 开始', VW / 2, 46);
 
     var d = PG.save.load();
     var n = 5;
@@ -784,12 +784,12 @@
       }
 
       // 世界名称
-      ctx.font = 'bold 11px "Courier New", monospace';
+      ctx.font = 'bold 13px "PingFang SC","Microsoft YaHei",sans-serif';
       ctx.fillStyle = locked ? '#b8a080' : '#5a3e2b';
-      ctx.fillText(th.name, x + cardW / 2, y + 16);
-      ctx.font = '8px "Courier New", monospace';
+      ctx.fillText(th.name, x + cardW / 2, y + 18);
+      ctx.font = '10px "PingFang SC","Microsoft YaHei",sans-serif';
       ctx.fillStyle = locked ? '#c0a888' : '#8b5a2b';
-      ctx.fillText(locked ? 'LOCKED' : 'WORLD ' + (i+1), x + cardW / 2, y + 30);
+      ctx.fillText(locked ? '🔒 未解锁' : '第 ' + (i+1) + ' 世界', x + cardW / 2, y + 34);
 
       // 关卡列表
       for (var l = 0; l < 3; l++) {
@@ -836,8 +836,8 @@
     ][G.selWorld];
     ctx.fillText(desc, VW / 2, 225);
     ctx.fillStyle = '#a67c52';
-    ctx.font = '8px "Courier New", monospace';
-    ctx.fillText('ENTER 出发    ESC 返回标题', VW / 2, 245);
+    ctx.font = '10px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.fillText('回车 出发    Esc 返回标题', VW / 2, 248);
 
     ctx.textAlign = 'left';
   }
