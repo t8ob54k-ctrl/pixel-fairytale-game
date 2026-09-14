@@ -1146,6 +1146,19 @@
     fit();
   }
 
+  /* 旋转后多次重试，等iOS尺寸稳定（iOS Safari旋转时innerWidth/Height更新慢） */
+  function onRotate() {
+    // 旋转瞬间先清掉所有按键，防止手指还按着导致卡键
+    if (PG.input) {
+      for (var k in PG.input.held) PG.input.held[k] = false;
+    }
+    checkOrient();
+    // iOS旋转后尺寸可能在200-500ms内多次变化，多调几次确保最终尺寸正确
+    setTimeout(checkOrient, 120);
+    setTimeout(checkOrient, 300);
+    setTimeout(checkOrient, 600);
+  }
+
   /* 进入横屏全屏（必须在用户手势里调用） */
   function goLandscape() {
     var el = document.documentElement;
@@ -1170,8 +1183,12 @@
     } catch (e) {}
   }
 
-  window.addEventListener('resize', checkOrient);
-  window.addEventListener('orientationchange', function () { setTimeout(checkOrient, 140); });
+  window.addEventListener('resize', onRotate);
+  window.addEventListener('orientationchange', onRotate);
+  // iOS Safari用visualViewport拿准确尺寸（含地址栏伸缩）
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', checkOrient);
+  }
 
   /* ---------------- 触摸按键 ---------------- */
   var touchRoot = document.getElementById('touch');
